@@ -259,7 +259,7 @@ public ListNode RemoveNthFromEnd(ListNode head, int n) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the number of nodes. We traverse the list twice: once to find the nth node and once to remove it (in a single pass approach, it's still O(n) with two pointers).
+- **Time Complexity**: O(n) where n is the number of nodes. We advance one pointer by n steps, then move both pointers together to the end (overall linear time).
 - **Space Complexity**: O(1) - only uses two pointers, no extra data structures.
 
 ---
@@ -267,112 +267,89 @@ public ListNode RemoveNthFromEnd(ListNode head, int n) {
 ## 4. Reorder List (LeetCode 143)
 
 ### Description:
-You are given the head of a singly linked list. Reorder the list such that: the list first contains all nodes from the first half, followed by all nodes from the second half in reverse order. The reordering should happen in-place without modifying the node values.
+You are given the head of a singly linked list. Reorder the list in-place to follow the pattern:
+L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …
+Do not modify node values; only change pointers.
 
 ### Examples:
 1. Input: head = [1,2,3,4] → Output: [1,4,2,3]
    - Original list: 1 → 2 → 3 → 4
-   - First half: 1 → 2
-   - Second half reversed: 4 → 3
-   - Reordered: 1 → 4 → 2 → 3
-   - Alternating pattern: first from first half, then from reversed second half
+   - Reverse the second half (3 → 4 becomes 4 → 3)
+   - Merge alternately: 1 → 4 → 2 → 3
 
 2. Input: head = [1,2,3,4,5] → Output: [1,5,2,4,3]
    - Original list: 1 → 2 → 3 → 4 → 5
-   - First half: 1 → 2 (middle node is 3)
-   - Second half: 4 → 5
-   - Second half reversed: 5 → 4
-   - Reordered: 1 → 5 → 2 → 4 → 3
-   - Alternating pattern maintains the middle node 3 at the end
+   - Split after the middle (3): first half 1 → 2 → 3, second half 4 → 5
+   - Reverse second half: 5 → 4
+   - Merge alternately: 1 → 5 → 2 → 4 → 3
 
 3. Input: head = [1,2] → Output: [1,2]
-   - Original list: 1 → 2
-   - First half: 1
-   - Second half reversed: 2
-   - Reordered: 1 → 2
-   - No change as there are only 2 nodes
+   - Only two nodes, so the list is already in the required order
 
 ### Pseudocode:
 ```
-1. Find the middle of the list using slow and fast pointers
+1. Find the middle using slow/fast pointers
+   - After the loop, slow points to the last node of the first half
 
-2. Split the list into two halves at the middle
+2. Reverse the second half starting at slow.next
+   - Detach halves: slow.next = null
 
-3. Reverse the second half
-
-4. Merge the two halves by interleaving nodes:
-   - Take one node from first half, one from reversed second half
-   - Continue until second half is exhausted
+3. Merge by alternating nodes
+   - Take one from first half, then one from reversed second half
+   - Stop when the second half is exhausted
 ```
 
 ### C# Solution:
 ```csharp
 public void ReorderList(ListNode head) {
-    // Edge case: single node or two nodes
     if (head == null || head.next == null) {
         return;
     }
-    
-    // Step 1: Find the middle of the list
+
+    // Step 1: Find the middle (slow ends at last node of first half)
     ListNode slow = head;
     ListNode fast = head;
-    ListNode prev = null;
-    
-    while (fast != null && fast.next != null) {
-        prev = slow;
+    while (fast.next != null && fast.next.next != null) {
         slow = slow.next;
         fast = fast.next.next;
     }
-    
-    // Step 2: Split the list into two halves
-    // prev is the last node of first half, slow is the start of second half
-    prev.next = null;
-    
-    // Step 3: Reverse the second half
-    ListNode secondHalf = ReverseList(slow);
-    
-    // Step 4: Merge the two halves
+
+    // Step 2: Reverse the second half (starts after slow)
+    ListNode second = ReverseList(slow.next);
+    slow.next = null;
+
+    // Step 3: Merge alternating
     ListNode first = head;
-    ListNode second = secondHalf;
-    
-    while (second != null) { // second half is shorter or equal
-        // Store next nodes
+    while (second != null) {
         ListNode nextFirst = first.next;
         ListNode nextSecond = second.next;
-        
-        // Interleave: first from first half, then from second half
+
         first.next = second;
         second.next = nextFirst;
-        
-        // Move to next nodes
+
         first = nextFirst;
         second = nextSecond;
     }
 }
 
-// Helper method to reverse a linked list
 private ListNode ReverseList(ListNode head) {
     ListNode prev = null;
     ListNode current = head;
-    
+
     while (current != null) {
-        // Store next node
         ListNode nextTemp = current.next;
-        
-        // Reverse the link
         current.next = prev;
-        
-        // Move prev and current forward
         prev = current;
         current = nextTemp;
     }
-    
+
     return prev;
 }
 ```
 
-- **Time Complexity**: O(n) where n is the number of nodes. Finding middle takes O(n/2), reversing takes O(n/2), and merging takes O(n/2).
-- **Space Complexity**: O(1) - only uses pointers, reordering happens in-place.
+- **Time Complexity**: O(n) where n is the number of nodes (find middle + reverse + merge).
+- **Space Complexity**: O(1) - reordering happens in-place using constant pointers.
+
 
 ---
 
