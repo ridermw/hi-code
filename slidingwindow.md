@@ -1,5 +1,42 @@
 # Sliding Window Problems
 
+## Sliding Window Concept
+
+### What is Sliding Window?
+The sliding window technique is an optimization method that transforms nested loops into a single loop by maintaining a "window" that slides across the data structure (usually an array or string). Instead of recalculating from scratch for each position, we incrementally update the window by adding new elements on one end and removing elements from the other.
+
+### When to Use Sliding Window?
+Use this technique when:
+- You need to find a contiguous subarray/substring that satisfies certain conditions
+- The problem asks for min/max length, sum, or count of subarrays
+- Recalculating the answer from scratch for each position would be inefficient
+- The window boundaries can be determined by a valid/invalid condition
+
+### Generic Pattern:
+```
+Initialize window boundaries (left, right)
+Initialize window state (sum, set, map, etc.)
+
+For right from 0 to array length - 1:
+    Expand: Add element at right to window state
+    
+    While window is invalid:
+        Shrink: Remove element at left from window state
+        Move left boundary forward
+    
+    Update result based on current valid window
+```
+
+### Example:
+**Problem:** Find max sum of subarray with sum ≤ target
+
+**Why Sliding Window?** Instead of checking all O(n²) subarrays, we maintain one window and adjust it based on whether sum ≤ target. As we slide right, if sum > target, we shrink from left. This reduces time to O(n).
+
+**Without Sliding Window:** Check every subarray [i...j], recalculate sum each time → O(n²) or O(n³)
+**With Sliding Window:** Maintain running sum, add/remove elements as window slides → O(n)
+
+---
+
 ## 1. Longest Substring Without Repeating Characters
 
 ### Description:
@@ -18,10 +55,17 @@ Find the length of the longest substring that contains no repeating characters. 
 
 ### Pseudocode:
 ```
+WHY SLIDING WINDOW?
+- Checking all O(n²) substrings and validating each would be O(n³)
+- Instead, maintain a window of unique characters
+- When duplicate found, shrink window from left until unique again
+- This ensures we check each character at most twice (once in, once out) → O(n)
+
 Initialize left = 0, maxLength = 0, charMap (HashSet)
 For right from 0 to string length - 1:
+    // Expand window by adding right character
     While character at right exists in charMap:
-        Remove character at left from charMap
+        Remove character at left from charMap  // Shrink window
         Increment left pointer
     
     Add character at right to charMap
@@ -53,6 +97,11 @@ public int LengthOfLongestSubstring(string s) {
 }
 ```
 
+- **Time Complexity**: O(n) where n is the length of the string. Each character is added once and removed at most once.
+- **Space Complexity**: O(min(n, c)) where c is the character set size (26 for lowercase English letters). Worst case O(n) if all characters are unique.
+
+---
+
 ## 2. Longest Repeating Character Replacement
 
 ### Description:
@@ -70,16 +119,23 @@ Given a string and integer k, find the length of the longest substring that can 
 
 ### Pseudocode:
 ```
+WHY SLIDING WINDOW?
+- Need longest valid substring where (window_size - most_frequent_char) ≤ k
+- Instead of checking all O(n²) substrings, maintain a window
+- Track frequency to know most common character in current window
+- When invalid (need > k replacements), shrink from left
+- This reduces O(n²) brute force to O(n) single pass
+
 Initialize left = 0, maxCount = 0, maxLength = 0
 Initialize frequency map (Dictionary<char, int>)
 
 For right from 0 to string length - 1:
-    Update frequency of character at right
+    Update frequency of character at right  // Expand window
     
     Update maxCount = max(maxCount, frequency[character at right])
     
-    While (right - left + 1) - maxCount > k:
-        Decrement frequency of character at left
+    While (right - left + 1) - maxCount > k:  // Window invalid
+        Decrement frequency of character at left  // Shrink window
         Increment left pointer
     
     Update maxLength = max(maxLength, right - left + 1)
@@ -118,6 +174,11 @@ public int CharacterReplacement(string s, int k) {
 }
 ```
 
+- **Time Complexity**: O(n) where n is the length of the string. Each character is processed at most twice (added once, removed once).
+- **Space Complexity**: O(c) where c is the number of unique characters in the string (at most 26 for uppercase English letters, effectively O(1)).
+
+---
+
 ## 3. Maximum Sum of Subarrays of Size K
 
 ### Description:
@@ -137,12 +198,17 @@ Find the maximum sum of any contiguous subarray of size k in the given array. Th
 
 ### Pseudocode:
 ```
+WHY SLIDING WINDOW?
+- Brute force: calculate sum for each k-sized subarray → O(n*k)
+- Sliding window: reuse previous sum, subtract left element, add right element
+- This optimizes from O(n*k) to O(n) - classic fixed-size window problem
+
 Initialize windowSum = sum of first k elements
 Initialize maxSum = windowSum
 
 For i from k to array length - 1:
-    Remove element at i-k from windowSum
-    Add element at i to windowSum
+    Remove element at i-k from windowSum  // Slide window: remove old left
+    Add element at i to windowSum         // Slide window: add new right
     Update maxSum = max(maxSum, windowSum)
 ```
 
@@ -170,6 +236,11 @@ public int MaximumSumSubarray(int[] arr, int k) {
 }
 ```
 
+- **Time Complexity**: O(n) where n is the length of the array. We calculate the first window sum in O(k), then slide through remaining elements in O(n-k). Overall O(n).
+- **Space Complexity**: O(1) - only use constant variables for sum tracking.
+
+---
+
 ## 4. Max Points You Can Obtain From Cards
 
 ### Description:
@@ -188,12 +259,18 @@ You are given a row of cards with point values. You can take exactly k cards, ta
 
 ### Pseudocode:
 ```
-Calculate sum of first k cards
+WHY SLIDING WINDOW?
+- Can take k cards from left/right ends only
+- Instead of trying all combinations, realize: taking i from right = taking (k-i) from left
+- Start with k cards from left, then slide window: drop one left card, add one right card
+- This checks all k+1 combinations in O(k) instead of exponential
+
+Calculate sum of first k cards  // Initial window: all from left
 Initialize maxPoints = sum of first k cards
 
 For i from 0 to k-1:
-    Remove element at position (k-1-i) from sum
-    Add element at position (length-k+i) to sum
+    Remove element at position (k-1-i) from sum  // Drop one from left
+    Add element at position (length-k+i) to sum  // Add one from right
     Update maxPoints = max(maxPoints, currentSum)
 ```
 
@@ -222,6 +299,11 @@ public int MaxScore(int[] cardPoints, int k) {
 }
 ```
 
+- **Time Complexity**: O(k) where k is the number of cards to take. We calculate initial sum in O(k) and slide the window k times.
+- **Space Complexity**: O(1) - only use constant variables for sum tracking.
+
+---
+
 ## 5. Max Sum of Distinct Subarrays Length K
 
 ### Description:
@@ -240,19 +322,25 @@ Find the maximum sum among all distinct subarrays of size k in the array. This r
 
 ### Pseudocode:
 ```
+WHY SLIDING WINDOW?
+- Need k-sized subarrays with all distinct elements
+- Brute force: check all O(n-k+1) subarrays, validate distinctness each time → O(n*k)
+- Sliding window: maintain frequency map as window slides, check in O(1) → O(n)
+- Add/remove elements incrementally instead of rechecking entire subarray
+
 Initialize maxSum = 0
 Initialize windowStart = 0, currentSum = 0
 Initialize frequencyMap (Dictionary<int, int>)
 
 For windowEnd from 0 to array length - 1:
-    Add element at windowEnd to frequencyMap and currentSum
+    Add element at windowEnd to frequencyMap and currentSum  // Expand window
     
-    If window size > k:
-        Remove element at windowStart from frequencyMap and currentSum
+    If window size > k:  // Window too large
+        Remove element at windowStart from frequencyMap and currentSum  // Shrink
         Increment windowStart
     
     If window size == k:
-        If all elements in window are distinct:
+        If all elements in window are distinct:  // Check: frequency.Count == k
             Update maxSum = max(maxSum, currentSum)
 ```
 
@@ -295,6 +383,11 @@ public int MaximumSubarraySum(int[] nums, int k) {
     return maxSum;
 }
 ```
+
+- **Time Complexity**: O(n) where n is the length of the array. Each element is added to and removed from the window at most once.
+- **Space Complexity**: O(k) for the frequency dictionary, which stores at most k unique elements in the window.
+
+---
 
 ## 6. Adjacent Increasing Subarrays Detection II
 
