@@ -50,7 +50,7 @@ Use this technique when:
 
 ---
 
-## 1. Container With Most Water
+## 1. Container With Most Water | LeetCode 11 | Medium
 
 ### Description:
 Given n non-negative integers representing vertical lines, find two lines that form a container which holds the most water.
@@ -59,6 +59,8 @@ Given n non-negative integers representing vertical lines, find two lines that f
 1. Input: [1,8,6,2,5,4,8,3,7] → Output: 49 (Lines at index 1 and 8)
 2. Input: [1,1] → Output: 1 (Lines at index 0 and 1)
 3. Input: [4,3,2,1,4] → Output: 16 (Lines at index 0 and 4)
+4. Input: [1,2,1] → Output: 2 (Lines at index 0 and 2)
+5. Input: [2,3,10,5,7,8,9] → Output: 36 (Lines at index 2 and 6)
 
 ### Pseudocode:
 ```
@@ -105,12 +107,14 @@ public int MaxArea(int[] height) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the number of elements. Each pointer moves at most n times total.
-- **Space Complexity**: O(1) - only uses constant variables for tracking.
+### Complexity:
+**Time Complexity**: O(n) where n is the number of elements. Each pointer moves at most n times total.
+
+**Space Complexity**: O(1) - only uses constant variables for tracking.
 
 ---
 
-## 2. Two Sum Sorted
+## 2. Two Sum Sorted | LeetCode 167 | Easy
 
 ### Description:
 Given a sorted array and target sum, find two indices such that their values add up to the target.
@@ -119,6 +123,8 @@ Given a sorted array and target sum, find two indices such that their values add
 1. Input: [2,7,11,15], target = 9 → Output: [1,2] (indices 1 and 2)
 2. Input: [2,3,4], target = 6 → Output: [1,3] (indices 1 and 3)
 3. Input: [-1,0], target = -1 → Output: [1,2] (indices 1 and 2)
+4. Input: [0,0,3,4], target = 0 → Output: [1,2] (indices 1 and 2)
+5. Input: [-10,-8,-2,1,2,9], target = -9 → Output: [1,4] (indices 1 and 4)
 
 ### Pseudocode:
 ```
@@ -165,12 +171,14 @@ public int[] TwoSum(int[] numbers, int target) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the length of the array. Each pointer moves through array once.
-- **Space Complexity**: O(1) - only uses constant variables.
+### Complexity:
+**Time Complexity**: O(n) where n is the length of the array. Each pointer moves through array once.
+
+**Space Complexity**: O(1) - only uses constant variables.
 
 ---
 
-## 3. Three Sum
+## 3. Three Sum | LeetCode 15 | Medium
 
 ### Description:
 Find all unique triplets that sum to zero in an array.
@@ -179,6 +187,8 @@ Find all unique triplets that sum to zero in an array.
 1. Input: [-1,0,1,2,-1,-4] → Output: [[-1,-1,2], [-1,0,1]]
 2. Input: [0,1,1] → Output: []
 3. Input: [0,0,0] → Output: [[0,0,0]]
+4. Input: [-2,0,0,2,2] → Output: [[-2,0,2]]
+5. Input: [-1,-1,-1,2,2] → Output: [[-1,-1,2]]
 
 ### Pseudocode:
 ```
@@ -246,12 +256,14 @@ public IList<IList<int>> ThreeSum(int[] nums) {
 }
 ```
 
-- **Time Complexity**: O(n²) where n is the length of the array. Sorting is O(n log n), outer loop O(n), inner two-pointer loop O(n).
-- **Space Complexity**: O(1) or O(n) depending on sorting implementation. Result list not counted in space complexity.
+### Complexity:
+**Time Complexity**: O(n²) where n is the length of the array. Sorting is O(n log n), outer loop O(n), inner two-pointer loop O(n).
+
+**Space Complexity**: O(1) or O(n) depending on sorting implementation. Result list not counted in space complexity.
 
 ---
 
-## 4. Triangle Numbers
+## 4. Triangle Numbers | LeetCode 611 | Medium
 
 ### Description:
 Count the number of valid triangles that can be formed with given array elements.
@@ -260,6 +272,8 @@ Count the number of valid triangles that can be formed with given array elements
 1. Input: [2,2,3,4] → Output: 3 (Valid triangles: [2,3,4], [2,3,4], [2,2,3])
 2. Input: [4,3,2,1] → Output: 0 (No valid triangles)
 3. Input: [1,2,3,4,5] → Output: 7 (Valid triangles)
+4. Input: [1,1,1,1] → Output: 4 (All triplets form a triangle)
+5. Input: [2,2,3,4,4] → Output: 8 (Multiple triangles across duplicates)
 
 ### Pseudocode:
 ```
@@ -306,12 +320,14 @@ public int TriangleNumber(int[] nums) {
 }
 ```
 
-- **Time Complexity**: O(n²) where n is the length of the array. Sorting is O(n log n), outer loop O(n), inner nested loops O(n²) worst case (but k optimization helps).
-- **Space Complexity**: O(1) - only uses counter and indices (excluding sorting space).
+### Complexity:
+**Time Complexity**: O(n²) where n is the length of the array. Sorting is O(n log n), outer loop O(n), inner nested loops O(n²) worst case (but k optimization helps).
+
+**Space Complexity**: O(1) - only uses counter and indices (excluding sorting space).
 
 ---
 
-## 5. Move Zeroes
+## 5. Move Zeroes | LeetCode 283 | Easy
 
 ### Description:
 Move all zeros to the end of array while maintaining relative order of non-zero elements.
@@ -320,6 +336,8 @@ Move all zeros to the end of array while maintaining relative order of non-zero 
 1. Input: [0,1,0,3,12] → Output: [1,3,12,0,0]
 2. Input: [0] → Output: [0]
 3. Input: [1,2,3] → Output: [1,2,3]
+4. Input: [0,0,0,1] → Output: [1,0,0,0]
+5. Input: [4,0,5,0,0,3,0,1] → Output: [4,5,3,1,0,0,0,0]
 
 ### Pseudocode:
 ```
@@ -361,12 +379,14 @@ public void MoveZeroes(int[] nums) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the length of the array. Single pass through array to move non-zeros, then fill zeros.
-- **Space Complexity**: O(1) - in-place modification with constant variables.
+### Complexity:
+**Time Complexity**: O(n) where n is the length of the array. Single pass through array to move non-zeros, then fill zeros.
+
+**Space Complexity**: O(1) - in-place modification with constant variables.
 
 ---
 
-## 6. Sort Colors
+## 6. Sort Colors | LeetCode 75 | Medium
 
 ### Description:
 Sort an array containing only 0s, 1s, and 2s representing red, white, and blue colors.
@@ -375,6 +395,8 @@ Sort an array containing only 0s, 1s, and 2s representing red, white, and blue c
 1. Input: [2,0,2,1,1,0] → Output: [0,0,1,1,2,2]
 2. Input: [2,0,1] → Output: [0,1,2]
 3. Input: [0] → Output: [0]
+4. Input: [2,2,1,1,0,0] → Output: [0,0,1,1,2,2]
+5. Input: [1,2,0,1,2,0,1] → Output: [0,0,1,1,1,2,2]
 
 ### Pseudocode:
 ```
@@ -431,12 +453,14 @@ public void SortColors(int[] nums) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the length of the array. Single pass through the array.
-- **Space Complexity**: O(1) - in-place swapping with three pointers.
+### Complexity:
+**Time Complexity**: O(n) where n is the length of the array. Single pass through the array.
+
+**Space Complexity**: O(1) - in-place swapping with three pointers.
 
 ---
 
-## 7. Trapping Rain Water
+## 7. Trapping Rain Water | LeetCode 42 | Hard
 
 ### Description:
 Calculate how much water can be trapped between bars of given heights.
@@ -445,6 +469,8 @@ Calculate how much water can be trapped between bars of given heights.
 1. Input: [0,1,0,2,1,0,1,3,2,1,2,1] → Output: 6
 2. Input: [3,0,2,0,4] → Output: 7
 3. Input: [1,0,1] → Output: 1
+4. Input: [4,2,0,3,2,5] → Output: 9
+5. Input: [5,2,1,2,1,5] → Output: 14
 
 ### Pseudocode:
 ```
@@ -507,5 +533,7 @@ public int Trap(int[] height) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the length of the array. Single pass with two pointers converging.
-- **Space Complexity**: O(1) - only uses constant variables to track maximums and water.
+### Complexity:
+**Time Complexity**: O(n) where n is the length of the array. Single pass with two pointers converging.
+
+**Space Complexity**: O(1) - only uses constant variables to track maximums and water.

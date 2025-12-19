@@ -47,16 +47,18 @@ Use stacks when:
 
 ---
 
-## Valid Parentheses (LeetCode Problem 20)
+## Valid Parentheses | LeetCode 20 | Easy
 Given a string `s` containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if:
 1. Open brackets must be closed by the same type of brackets.
 2. Open brackets must be closed in the correct order.
 3. Every close bracket has a corresponding open bracket of the same type.
 
 ### Examples:
-1. Input = "()", Output = true since the string contains balanced parentheses.
-2. Input = "()[]{}", Output = true since the string contains balanced parentheses of different types.
-3. Input = "(]", Output = false since the opening bracket is not closed by the correct closing bracket.
+1. Input = "()", Output = true since the string contains balanced parentheses.  
+2. Input = "()[]{}", Output = true since the string contains balanced parentheses of different types.  
+3. Input = "(]", Output = false since the opening bracket is not closed by the correct closing bracket.  
+4. Input = "([{}])", Output = true  
+5. Input = "(((())))[]{}", Output = true  
 
 ### Pseudocode:
 ```
@@ -97,16 +99,22 @@ public bool IsValid(string s) {
     return stack.Count == 0;
 }
 ```
-- Time Complexity: O(n) since we iterate through the input string once.
-- Space Complexity: O(n) in the worst case where all characters are opening brackets.
 
-## Decode String (LeetCode Problem 394)
+### Complexity
+
+**Time Complexity**: O(n) since we iterate through the input string once.
+
+**Space Complexity**: O(n) in the worst case where all characters are opening brackets.
+
+## Decode String | LeetCode 394 | Medium
 Given an encoded string, return its decoded string. The encoding rule is: `k[encoded_string]`, where the encoded_string inside the square brackets is being repeated exactly k times. Note that `k` is guaranteed to be a positive integer. You may assume that the input string is always valid; No extra white spaces, square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain any digits and that digits are only for those repeat numbers, `k`. For example, there won't be input like `3a` or `2[4]`.
 
 ### Examples:
-1. Input = "3[a]2[bc]", Output = "aaabcbc"
-2. Input = "3[a2[c]]", Output = "accaccacc"
-3. Input = "2[abc]3[cd]ef", Output = "abcabccdcdcdef"
+1. Input = "3[a]2[bc]", Output = "aaabcbc"  
+2. Input = "3[a2[c]]", Output = "accaccacc"  
+3. Input = "2[abc]3[cd]ef", Output = "abcabccdcdcdef"  
+4. Input = "10[a]", Output = "aaaaaaaaaa"  
+5. Input = "3[a2[b3[c]]]", Output = "abcccbcccabcccbcccabcccbccc"  
 
 ### Pseudocode:
 ```
@@ -166,16 +174,21 @@ public string DecodeString(string s) {
 }
 ```
 
-- **Time Complexity**: O(n) where n is the length of the decoded string. Each character in the input is processed once, but may be repeated in the output.
-- **Space Complexity**: O(n) for the stacks and intermediate strings during nested decoding.
+### Complexity
 
-## Longest Valid Parentheses (LeetCode Problem 32)
+**Time Complexity**: O(n) where n is the length of the decoded string. Each character in the input is processed once, but may be repeated in the output.
+
+**Space Complexity**: O(n) for the stacks and intermediate strings during nested decoding.
+
+## Longest Valid Parentheses | LeetCode 32 | Hard
 Given a string consisting of opening and closing parentheses, find the length of the longest valid (well-formed) parentheses substring.
 
 ### Examples:
-1. Input = "(()", Output = 2 since the longest valid substring is "()" with a length of 2.
-2. Input = ")()())", Output = 4 since the longest valid substring is "()()" with a length of 4.
-3. Input = "", Output = 0 since there are no valid parentheses in the string.
+1. Input = "(()", Output = 2 since the longest valid substring is "()" with a length of 2.  
+2. Input = ")()())", Output = 4 since the longest valid substring is "()()" with a length of 4.  
+3. Input = "", Output = 0 since there are no valid parentheses in the string.  
+4. Input = "()(()", Output = 2  
+5. Input = "((())())(()(()))", Output = 8  
 
 ### Pseudocode:
 ```
@@ -216,16 +229,22 @@ public int LongestValidParentheses(string s) {
     return maxLength;
 }
 ```
-- Time Complexity: O(n) since we iterate through the input string once.
-- Space Complexity: O(n) in the worst case where all characters are opening parentheses.
 
-## Daily Temperatures (LeetCode Problem 739)
+### Complexity
+
+**Time Complexity**: O(n) since we iterate through the input string once.
+
+**Space Complexity**: O(n) in the worst case where all characters are opening parentheses.
+
+## Daily Temperatures | LeetCode 739 | Medium
 Given an array `T` representing the daily temperatures, return an array such that `ans[i]` contains the number of days until a warmer temperature. If there is no future day for which this is possible, keep `ans[i]` equals to 0 instead.
 
 ### Examples:
-1. Input = [73, 74, 75, 71, 69, 72, 76, 73], Output = [1, 1, 4, 2, 1, 1, 0, 0]
-2. Input = [30,40,50,60], Output = [1, 1, 1, 0]
-3. Input = [30,60,90], Output = [1, 1, 0]
+1. Input = [73, 74, 75, 71, 69, 72, 76, 73], Output = [1, 1, 4, 2, 1, 1, 0, 0]  
+2. Input = [30,40,50,60], Output = [1, 1, 1, 0]  
+3. Input = [30,60,90], Output = [1, 1, 0]  
+4. Input = [80,79,78,77], Output = [0,0,0,0]  
+5. Input = [70,71,70,71,70,71], Output = [1,0,1,0,1,0]  
 
 ### Pseudocode:
 ```
@@ -262,20 +281,26 @@ public int[] DailyTemperatures(int[] T) {
     return ans;
 }
 ```
-- Time Complexity: O(n) since we iterate through the input array once. In the worst case, each element is pushed and popped from the stack exactly once.
-- Space Complexity: O(n) in the worst case where all elements are pushed to the stack.
 
-## Largest Rectangle in Histogram (LeetCode Problem 84)
+### Complexity
+
+**Time Complexity**: O(n) since we iterate through the input array once. In the worst case, each element is pushed and popped from the stack exactly once.
+
+**Space Complexity**: O(n) in the worst case where all elements are pushed to the stack.
+
+## Largest Rectangle in Histogram | LeetCode 84 | Hard
 Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, find the area of the largest rectangle in the histogram.
 
 ### Examples:
-1. Input = [2, 1, 5, 6, 2, 3], Output = 10 
-   - Rectangle with height 5: extends from index 2 to 3 (width 2) = 5×2 = 10
-   - This is the maximum area possible
-2. Input = [2, 4], Output = 4 since the largest rectangle is one bar of height 4 with area 4.
-3. Input = [1,2,3,4,5], Output = 9 
-   - Rectangle with height 3: extends from index 0 to 4 (width 5 at height 1, or width 3 at height 3)
-   - Best is height 3 × width 3 = 9
+1. Input = [2, 1, 5, 6, 2, 3], Output = 10  
+   - Rectangle with height 5: extends from index 2 to 3 (width 2) = 5×2 = 10  
+   - This is the maximum area possible  
+2. Input = [2, 4], Output = 4 since the largest rectangle is one bar of height 4 with area 4.  
+3. Input = [1,2,3,4,5], Output = 9  
+   - Rectangle with height 3: extends from index 0 to 4 (width 5 at height 1, or width 3 at height 3)  
+   - Best is height 3 × width 3 = 9  
+4. Input = [6,2,5,4,5,1,6], Output = 12  
+5. Input = [1,1,1,1], Output = 4  
 
 ### Pseudocode:
 ```
@@ -315,7 +340,9 @@ public int LargestRectangleArea(int[] heights) {
     return maxArea;
 }
 ```
-- Time Complexity: O(n) since we iterate through the input array once. In the worst case, each element is pushed and popped from the stack exactly once.
-- Space Complexity: O(n) in the worst case where all elements are pushed to the stack.
 
-These Stack problems require us to use data structures such as stacks and linked lists to solve various string-based questions. The stack data structure is useful because it allows us to store and retrieve elements in a last-in, first-out (LIFO) manner. This property is helpful for solving problems related to string manipulation and validation, as it allows us to easily keep track of the previous state or value. By using stacks, we can solve problems such as validating parentheses, decoding encoded strings, finding the longest valid parentheses substring, and calculating the area of the largest rectangle in a histogram. The time complexity of these solutions is O(n), where n is the length of the input string or array, because we iterate through each character or element exactly once. The space complexity is also O(n) in the worst case, because we may need to store all characters or elements in a stack.
+### Complexity
+
+**Time Complexity**: O(n) since we iterate through the input array once. In the worst case, each element is pushed and popped from the stack exactly once.
+
+**Space Complexity**: O(n) in the worst case where all elements are pushed to the stack.

@@ -37,7 +37,7 @@ For right from 0 to array length - 1:
 
 ---
 
-## 1. Longest Substring Without Repeating Characters
+## 1. [Medium] Longest Substring Without Repeating Characters (LeetCode #3)
 
 ### Description:
 Find the length of the longest substring that contains no repeating characters. This problem requires maintaining a window of unique characters and expanding/shrinking it as needed.
@@ -104,7 +104,7 @@ public int LengthOfLongestSubstring(string s) {
 
 ---
 
-## 2. Longest Repeating Character Replacement
+## 2. [Medium] Longest Repeating Character Replacement (LeetCode #424)
 
 ### Description:
 Given a string and integer k, find the length of the longest substring that can be made with at most k replacements. The approach uses sliding window to maintain a valid window where we can make all characters the same with at most k changes.
@@ -183,7 +183,7 @@ public int CharacterReplacement(string s, int k) {
 
 ---
 
-## 3. Maximum Sum of Subarrays of Size K
+## 3. [Easy] Maximum Sum of Subarrays of Size K (LeetCode #643)
 
 ### Description:
 Find the maximum sum of any contiguous subarray of size k in the given array. This is a classic fixed-size sliding window problem where we maintain a window of exactly k elements.
@@ -247,7 +247,7 @@ public int MaximumSumSubarray(int[] arr, int k) {
 
 ---
 
-## 4. Max Points You Can Obtain From Cards
+## 4. [Medium] Max Points You Can Obtain From Cards (LeetCode #1423)
 
 ### Description:
 You are given a row of cards with point values. You can take exactly k cards, taking one from either the beginning or end of the row in each step. The goal is to maximize the sum of taken cards.
@@ -312,7 +312,7 @@ public int MaxScore(int[] cardPoints, int k) {
 
 ---
 
-## 5. Max Sum of Distinct Subarrays Length K
+## 5. [Medium] Max Sum of Distinct Subarrays Length K (LeetCode #2461)
 
 ### Description:
 Find the maximum sum among all distinct subarrays of size k in the array. This requires checking that each subarray has all unique elements.
@@ -399,7 +399,7 @@ public int MaximumSubarraySum(int[] nums, int k) {
 
 ---
 
-## 6. Adjacent Increasing Subarrays Detection II
+## 6. [Hard] Adjacent Increasing Subarrays Detection II (LeetCode #3350)
 
 ### Description:
 Given an integer array `nums`, determine whether there exists an integer `k ≥ 1` and an index `i` such that:

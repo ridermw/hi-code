@@ -54,12 +54,12 @@ Common Techniques:
 
 ---
 
-## 1. Linked List Cycle (LeetCode 141)
+## 1. Linked List Cycle | LeetCode 141 | Easy
 
-### Description:
+### Description
 Given the head of a linked list, determine if the linked list has a cycle in it. A cycle exists if you can start at some node and traverse the list following the next pointers and eventually reach the same node again. Return true if there is a cycle, false otherwise.
 
-### Examples:
+### Examples
 1. Input: head = [3,2,0,-4], pos = 1 → Output: true
    - The list is: 3 → 2 → 0 → -4 → (back to node 2)
    - There is a cycle because node -4 points back to node 2
@@ -75,7 +75,13 @@ Given the head of a linked list, determine if the linked list has a cycle in it.
    - There is no cycle
    - Single node with no pointer back to itself
 
-### Pseudocode:
+4. Input: head = [1,2,3,4], pos = -1 → Output: false
+   - Long list with no back edge
+
+5. Input: head = [1,1,1], pos = 1 → Output: true
+   - Tail reconnects to a middle node
+
+### Pseudocode
 ```
 WHY FLOYD'S ALGORITHM (TWO POINTERS)?
 - Brute force: Use HashSet to track visited nodes → O(n) space
@@ -97,7 +103,7 @@ While fast is not null and fast.next is not null:
 Return false (no cycle found - fast reached end)
 ```
 
-### C# Solution:
+### C# Solution
 ```csharp
 /**
  * Definition for singly-linked list node
@@ -141,18 +147,20 @@ public bool HasCycle(ListNode head) {
     return false;
 }
 ```
+### Complexity
 
-- **Time Complexity**: O(n) where n is the number of nodes. If there is a cycle, fast pointer catches slow pointer within the cycle. If no cycle, fast pointer reaches null.
-- **Space Complexity**: O(1) - only uses two pointers regardless of input size.
+**Time Complexity**: O(n) where n is the number of nodes. If there is a cycle, fast pointer catches slow pointer within the cycle. If no cycle, fast pointer reaches null.
+
+**Space Complexity**: O(1) - only uses two pointers regardless of input size.
 
 ---
 
-## 2. Palindrome Linked List (LeetCode 234)
+## 2. Palindrome Linked List | LeetCode 234 | Easy
 
-### Description:
+### Description
 Given the head of a singly linked list, determine if it is a palindrome. A palindrome reads the same forward and backward. Return true if the linked list is a palindrome, false otherwise.
 
-### Examples:
+### Examples
 1. Input: head = [1,2,2,1] → Output: true
    - The list is: 1 → 2 → 2 → 1
    - Reading forward: 1, 2, 2, 1
@@ -171,7 +179,10 @@ Given the head of a singly linked list, determine if it is a palindrome. A palin
    - Reading backward: 5, 4, 3, 2, 1
    - They don't match, so it is not a palindrome
 
-### Pseudocode:
+4. Input: head = [1,2,3,2,1] → Output: true
+5. Input: head = [1,2,3,4,2,1] → Output: false
+
+### Pseudocode
 ```
 WHY THIS APPROACH?
 - Can't access nodes by index like arrays, so need to find middle first
@@ -194,7 +205,7 @@ WHY THIS APPROACH?
 4. Return true if all values match
 ```
 
-### C# Solution:
+### C# Solution
 ```csharp
 public bool IsPalindrome(ListNode head) {
     // Edge case: single node is always a palindrome
@@ -250,18 +261,20 @@ private ListNode ReverseList(ListNode head) {
     return prev;
 }
 ```
+### Complexity
 
-- **Time Complexity**: O(n) where n is the number of nodes. Finding middle takes O(n/2), reversing takes O(n/2), and comparison takes O(n/2).
-- **Space Complexity**: O(1) - only uses pointers, no extra data structures (constant space).
+**Time Complexity**: O(n) where n is the number of nodes. Finding middle takes O(n/2), reversing takes O(n/2), and comparison takes O(n/2).
+
+**Space Complexity**: O(1) - only uses pointers, no extra data structures (constant space).
 
 ---
 
-## 3. Remove Nth Node From End of List (LeetCode 19)
+## 3. Remove Nth Node From End of List | LeetCode 19 | Medium
 
-### Description:
+### Description
 Given the head of a linked list, remove the nth node from the end of the list and return the head of the list. Use a single pass algorithm if possible. The nodes are counted from 1 (first node is at index 1).
 
-### Examples:
+### Examples
 1. Input: head = [1,2,3,4,5], n = 2 → Output: [1,2,3,5]
    - The list is: 1 → 2 → 3 → 4 → 5
    - The 2nd node from the end is node with value 4
@@ -280,7 +293,10 @@ Given the head of a linked list, remove the nth node from the end of the list an
    - After removal: 1 → null
    - Node 1 now points to null, removing node 2
 
-### Pseudocode:
+4. Input: head = [1,2], n = 2 → Output: [2]
+5. Input: head = [1,2,3], n = 3 → Output: [2,3]
+
+### Pseudocode
 ```
 WHY TWO POINTERS WITH GAP?
 - Can't access nth node from end directly (no indexing)
@@ -305,7 +321,7 @@ WHY TWO POINTERS WITH GAP?
 5. Return dummy.next (the new head - handles if head was removed)
 ```
 
-### C# Solution:
+### C# Solution
 ```csharp
 public ListNode RemoveNthFromEnd(ListNode head, int n) {
     // Create a dummy node to handle edge case of removing the head
@@ -335,20 +351,22 @@ public ListNode RemoveNthFromEnd(ListNode head, int n) {
     return dummy.next;
 }
 ```
+### Complexity
 
-- **Time Complexity**: O(n) where n is the number of nodes. We advance one pointer by n steps, then move both pointers together to the end (overall linear time).
-- **Space Complexity**: O(1) - only uses two pointers, no extra data structures.
+**Time Complexity**: O(n) where n is the number of nodes. We advance one pointer by n steps, then move both pointers together to the end (overall linear time).
+
+**Space Complexity**: O(1) - only uses two pointers, no extra data structures.
 
 ---
 
-## 4. Reorder List (LeetCode 143)
+## 4. Reorder List | LeetCode 143 | Medium
 
-### Description:
+### Description
 You are given the head of a singly linked list. Reorder the list in-place to follow the pattern:
 L0 → Ln → L1 → Ln-1 → L2 → Ln-2 → …
 Do not modify node values; only change pointers.
 
-### Examples:
+### Examples
 1. Input: head = [1,2,3,4] → Output: [1,4,2,3]
    - Original list: 1 → 2 → 3 → 4
    - Reverse the second half (3 → 4 becomes 4 → 3)
@@ -363,7 +381,10 @@ Do not modify node values; only change pointers.
 3. Input: head = [1,2] → Output: [1,2]
    - Only two nodes, so the list is already in the required order
 
-### Pseudocode:
+4. Input: head = [1,2,3] → Output: [1,3,2]
+5. Input: head = [1,2,3,4,5,6] → Output: [1,6,2,5,3,4]
+
+### Pseudocode
 ```
 WHY THIS APPROACH?
 - Pattern requires alternating first/last nodes: L0→Ln→L1→Ln-1...
@@ -385,7 +406,7 @@ WHY THIS APPROACH?
    - Stop when the second half is exhausted (handles odd/even lengths)
 ```
 
-### C# Solution:
+### C# Solution
 ```csharp
 public void ReorderList(ListNode head) {
     if (head == null || head.next == null) {
@@ -432,19 +453,21 @@ private ListNode ReverseList(ListNode head) {
     return prev;
 }
 ```
+### Complexity
 
-- **Time Complexity**: O(n) where n is the number of nodes (find middle + reverse + merge).
-- **Space Complexity**: O(1) - reordering happens in-place using constant pointers.
+**Time Complexity**: O(n) where n is the number of nodes (find middle + reverse + merge).
+
+**Space Complexity**: O(1) - reordering happens in-place using constant pointers.
 
 
 ---
 
-## 5. Swap Nodes in Pairs (LeetCode 24)
+## 5. Swap Nodes in Pairs | LeetCode 24 | Medium
 
-### Description:
+### Description
 Given a linked list, swap every two adjacent nodes and return the head of the list. Do this without modifying the values in the list nodes (only nodes themselves may be changed). You must solve the problem in-place with O(1) extra space.
 
-### Examples:
+### Examples
 1. Input: head = [1,2,3,4] → Output: [2,1,4,3]
    - Original list: 1 → 2 → 3 → 4
    - Swap nodes 1 and 2: 2 → 1
@@ -465,7 +488,10 @@ Given a linked list, swap every two adjacent nodes and return the head of the li
    - Result: 1
    - Single node remains as is
 
-### Pseudocode:
+4. Input: head = [1,2,3,4,5] → Output: [2,1,4,3,5]
+5. Input: head = [1,2,3,4,5,6] → Output: [2,1,4,3,6,5]
+
+### Pseudocode
 ```
 WHY DUMMY NODE + POINTER MANIPULATION?
 - Must swap nodes themselves, not just values (requirement)
@@ -488,7 +514,7 @@ WHY DUMMY NODE + POINTER MANIPULATION?
 3. Return dummy.next (the new head - first node changed)
 ```
 
-### C# Solution:
+### C# Solution
 ```csharp
 public ListNode SwapPairs(ListNode head) {
     // Create a dummy node to handle edge case of swapping the head
@@ -525,7 +551,9 @@ public ListNode SwapPairs(ListNode head) {
     return dummy.next;
 }
 ```
+### Complexity
 
-- **Time Complexity**: O(n) where n is the number of nodes. We visit each node exactly once to swap pairs.
-- **Space Complexity**: O(1) - only uses constant pointers, swapping happens in-place with no extra data structures.
+**Time Complexity**: O(n) where n is the number of nodes. We visit each node exactly once to swap pairs.
+
+**Space Complexity**: O(1) - only uses constant pointers, swapping happens in-place with no extra data structures.
 
