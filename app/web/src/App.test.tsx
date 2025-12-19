@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import App from "./App";
 
-function jsonResponse(body: any, status = 200): Response {
+function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
@@ -130,6 +130,7 @@ describe("App", () => {
 
       if (url.includes(`/api/users/user-2/reset`)) {
         return jsonResponse({
+          message: "Progress reset for user.",
           id: "user-2",
           name: "Neo",
           createdAt: new Date().toISOString(),

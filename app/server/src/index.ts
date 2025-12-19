@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+import fs from "fs";
 import path from "path";
 import express, { NextFunction, Request, Response } from "express";
 import { FileStorageProvider } from "./storage/fileStorageProvider";
@@ -68,6 +68,7 @@ export function createServer(storage: StorageProvider): express.Express {
   const rootDir = path.resolve(__dirname, "..");
   const webDistDir = path.resolve(rootDir, "..", "web", "dist");
   const webIndexFile = path.join(webDistDir, "index.html");
+  const hasWebIndex = fs.existsSync(webIndexFile);
 
   app.use(express.json());
 
@@ -217,12 +218,15 @@ export function createServer(storage: StorageProvider): express.Express {
       return next();
     }
 
-    try {
-      await fs.access(webIndexFile);
-      response.sendFile(webIndexFile);
-    } catch {
-      next();
+    if (!hasWebIndex) {
+      return next();
     }
+
+    response.sendFile(webIndexFile, (error) => {
+      if (error) {
+        next(error);
+      }
+    });
   });
 
   app.use((error: Error, request: Request, response: Response, _next: NextFunction) => {
