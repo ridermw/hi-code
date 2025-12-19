@@ -17,6 +17,7 @@
 | Intervals | Insert Interval | Medium | 57 |  |
 | Intervals | Non Overlapping Intervals | Medium | 435 |  |
 | Intervals | Merge Intervals | Medium | 56 | 43.0 |
+| Intervals | Meeting Rooms II | Medium | 253 | 63.5 |
 | Intervals | Employee Free Time | Hard | 759 | 49.0 |
 | Intervals | Meeting Rooms III | Hard | 2402 |  |
 | Stack | Valid Parentheses | Easy | 20 | 63.5 |
@@ -29,6 +30,7 @@
 | Linked List | Remove Nth Node From End of List | Medium | 19 | 34.6 |
 | Linked List | Reorder List | Medium | 143 |  |
 | Linked List | Swap Nodes in Pairs | Medium | 24 |  |
+| Binary Search | Median of Two Sorted Arrays | Hard | 4 | 68.2 |
 | Binary Search | Apple Harvest Koko Eating Bananas | Medium | 875 |  |
 | Binary Search | Search in Rotated Sorted Array | Medium | 33 | 49.0 |
 | Heap | Kth Largest Element in an Array | Medium | 215 |  |
