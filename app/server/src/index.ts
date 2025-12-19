@@ -8,6 +8,14 @@ const app = express();
 
 app.use(express.json());
 
+function asyncHandler(
+  handler: (request: Request, response: Response, next: NextFunction) => any
+) {
+  return (request: Request, response: Response, next: NextFunction) => {
+    Promise.resolve(handler(request, response, next)).catch(next);
+  };
+}
+
 const REQUIRED_SECTIONS: ProblemSection[] = [
   "algorithms",
   "implementations",
@@ -37,9 +45,12 @@ function validateSelections(
       return `Selection for ${section} is required.`;
     }
 
-    const optionExists = problem.sections[section].some(
-      (option) => option.id === selection
-    );
+    const options = problem.sections[section];
+    if (!Array.isArray(options) || options.length === 0) {
+      return `Problem is missing options for ${section}.`;
+    }
+
+    const optionExists = options.some((option) => option.id === selection);
 
     if (!optionExists) {
       return `Selection ${selection} is not a valid option for ${section}.`;
@@ -49,36 +60,45 @@ function validateSelections(
   return null;
 }
 
-app.get("/api/problems", async (_request: Request, response: Response) => {
-  const problems = await storage.getProblems();
-  response.json({ problems });
-});
+app.get(
+  "/api/problems",
+  asyncHandler(async (_request: Request, response: Response) => {
+    const problems = await storage.getProblems();
+    response.json({ problems });
+  })
+);
 
-app.get("/api/problems/:id", async (request: Request, response: Response) => {
-  const problem = await storage.getProblemById(request.params.id);
+app.get(
+  "/api/problems/:id",
+  asyncHandler(async (request: Request, response: Response) => {
+    const problem = await storage.getProblemById(request.params.id);
 
-  if (!problem) {
-    return sendNotFound(response, "Problem not found.");
-  }
+    if (!problem) {
+      return sendNotFound(response, "Problem not found.");
+    }
 
-  const { answerKey, ...problemWithoutAnswer } = problem;
-  response.json(problemWithoutAnswer);
-});
+    const { answerKey, ...problemWithoutAnswer } = problem;
+    response.json(problemWithoutAnswer);
+  })
+);
 
-app.post("/api/users", async (request: Request, response: Response) => {
-  const name = request.body?.name;
+app.post(
+  "/api/users",
+  asyncHandler(async (request: Request, response: Response) => {
+    const name = request.body?.name;
 
-  if (typeof name !== "string" || !name.trim()) {
-    return sendBadRequest(response, "A non-empty name is required.");
-  }
+    if (typeof name !== "string" || !name.trim()) {
+      return sendBadRequest(response, "A non-empty name is required.");
+    }
 
-  const user = await storage.createUser(name.trim());
-  response.status(201).json(user);
-});
+    const user = await storage.createUser(name.trim());
+    response.status(201).json(user);
+  })
+);
 
 app.get(
   "/api/users/:userId/progress",
-  async (request: Request, response: Response) => {
+  asyncHandler(async (request: Request, response: Response) => {
     const user = await storage.getUser(request.params.userId);
 
     if (!user) {
@@ -91,12 +111,12 @@ app.get(
       createdAt: user.createdAt,
       attempts: user.attempts,
     });
-  }
+  })
 );
 
 app.post(
   "/api/users/:userId/attempts",
-  async (request: Request, response: Response) => {
+  asyncHandler(async (request: Request, response: Response) => {
     const { problemId, selections } = request.body ?? {};
 
     if (typeof problemId !== "string" || !problemId.trim()) {
@@ -153,12 +173,12 @@ app.post(
       attempt,
       overallCorrect: Object.values(correctness).every((value) => value),
     });
-  }
+  })
 );
 
 app.post(
   "/api/users/:userId/reset",
-  async (request: Request, response: Response) => {
+  asyncHandler(async (request: Request, response: Response) => {
     const user = await storage.getUser(request.params.userId);
 
     if (!user) {
@@ -175,7 +195,7 @@ app.post(
       createdAt: user.createdAt,
       attempts: user.attempts,
     });
-  }
+  })
 );
 
 app.use((error: Error, _request: Request, response: Response, _next: NextFunction) => {
