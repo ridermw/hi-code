@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { createUser, fetchUser, resetUserProgress } from "./api";
 import { Attempt, UserProfile } from "./types";
 
@@ -39,18 +39,18 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
       });
   }, []);
 
-  const authenticate = async (name: string) => {
+  const authenticate = useCallback(async (name: string) => {
     const profile = await createUser(name);
     localStorage.setItem(STORAGE_KEY, profile.id);
     setUser(profile);
-  };
+  }, []);
 
-  const clearUser = () => {
+  const clearUser = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setUser(null);
-  };
+  }, []);
 
-  const recordAttempt = (problemId: string, attempt: Attempt) => {
+  const recordAttempt = useCallback((problemId: string, attempt: Attempt) => {
     setUser((current) => {
       if (!current) {
         return current;
@@ -66,25 +66,25 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
         },
       };
     });
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!user) {
       return;
     }
 
     const profile = await fetchUser(user.id);
     setUser(profile);
-  };
+  }, [user]);
 
-  const resetProgress = async () => {
+  const resetProgress = useCallback(async () => {
     if (!user) {
       return;
     }
 
     const refreshed = await resetUserProgress(user.id);
     setUser(refreshed);
-  };
+  }, [user]);
 
   const value = useMemo(
     () => ({
@@ -96,7 +96,7 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
       resetProgress,
       refreshProfile,
     }),
-    [user, loading]
+    [user, loading, authenticate, clearUser, recordAttempt, resetProgress, refreshProfile]
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

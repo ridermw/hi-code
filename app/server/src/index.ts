@@ -8,14 +8,6 @@ const app = express();
 
 app.use(express.json());
 
-function asyncHandler(
-  handler: (request: Request, response: Response, next: NextFunction) => any
-) {
-  return (request: Request, response: Response, next: NextFunction) => {
-    Promise.resolve(handler(request, response, next)).catch(next);
-  };
-}
-
 const REQUIRED_SECTIONS: ProblemSection[] = [
   "algorithms",
   "implementations",

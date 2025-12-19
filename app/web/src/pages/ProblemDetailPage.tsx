@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { fetchProblem, submitAttempt } from "../api";
 import { Link, useNavigation, useRouteParams } from "../router";
-import { AttemptCorrectness, ProblemDetail, ProblemSection } from "../types";
+import { AttemptCorrectness, AttemptSelections, ProblemDetail, ProblemSection } from "../types";
 import { useUser } from "../user";
 
 const SECTION_COPY: Record<ProblemSection, { title: string; helper: string }> = {
@@ -132,12 +132,7 @@ export function ProblemDetailPage(): JSX.Element {
     setValidationError(null);
 
     try {
-      const preparedSelections = {
-        algorithms: selections.algorithms as string,
-        implementations: selections.implementations as string,
-        timeComplexities: selections.timeComplexities as string,
-        spaceComplexities: selections.spaceComplexities as string,
-      };
+      const preparedSelections = selections as AttemptSelections;
 
       const evaluation = await submitAttempt(user.id, problem.id, preparedSelections);
 
@@ -164,8 +159,13 @@ export function ProblemDetailPage(): JSX.Element {
       return;
     }
 
+    if (!window.confirm("This will clear attempts for all problems. Continue?")) {
+      return;
+    }
+
     setResetting(true);
     setSubmitError(null);
+    setValidationError(null);
 
     try {
       await resetProgress();
@@ -256,7 +256,8 @@ export function ProblemDetailPage(): JSX.Element {
                             type="button"
                             className={`option-button ${isSelected ? "option-button--selected" : ""} ${optionStateClass}`}
                             onClick={() => updateSelection(section, option.id)}
-                            aria-pressed={isSelected}
+                            role="radio"
+                            aria-checked={isSelected}
                           >
                             <span className="option-label">{option.label}</span>
                             {showEvaluation ? (
@@ -304,7 +305,7 @@ export function ProblemDetailPage(): JSX.Element {
                 onClick={handleResetHistory}
                 disabled={submitting || resetting}
               >
-                {resetting ? "Clearing..." : "Reset history"}
+                {resetting ? "Clearing..." : "Reset all history"}
               </button>
             </div>
           </div>
@@ -312,7 +313,7 @@ export function ProblemDetailPage(): JSX.Element {
           <div className="stack">
             <div className="panel-header">
               <h3>Attempt history</h3>
-              <p className="muted">Attempts are stored on the backend for this problem.</p>
+              <p className="muted">Attempts are stored on the backend. Resetting clears all problems.</p>
             </div>
             {attemptHistory.length === 0 ? (
               <p className="muted">You have not submitted any attempts yet.</p>
@@ -320,6 +321,7 @@ export function ProblemDetailPage(): JSX.Element {
               <ul className="attempt-list">
                 {attemptHistory.map((attempt, index) => {
                   const score = countCorrect(attempt.correctness);
+                  const sectionCount = Object.keys(attempt.correctness).length;
                   const isLatest = index === attemptHistory.length - 1;
 
                   return (
@@ -329,8 +331,8 @@ export function ProblemDetailPage(): JSX.Element {
                         <p className="muted">{formatDateTime(attempt.timestamp)}</p>
                       </div>
                       <div className="attempt-score">
-                        <span className="pill">{score}/4 correct</span>
-                        <span className="muted">{Object.keys(attempt.correctness).length} sections scored</span>
+                        <span className="pill">{score}/{sectionCount} correct</span>
+                        <span className="muted">{sectionCount} sections scored</span>
                       </div>
                     </li>
                   );
