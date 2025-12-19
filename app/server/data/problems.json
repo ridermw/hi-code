@@ -1,0 +1,11 @@
+{
+  "problems": [
+    {
+      "id": "two_sum",
+      "title": "Two Sum",
+      "category": "Arrays",
+      "difficulty": "Easy",
+      "path": "problems/two_sum.json"
+    }
+  ]
+}
