@@ -31,6 +31,18 @@ function sendNotFound(response: Response, message: string): void {
   response.status(404).json({ error: message });
 }
 
+type AsyncHandler = (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => Promise<void>;
+
+function asyncHandler(handler: AsyncHandler) {
+  return (request: Request, response: Response, next: NextFunction): void => {
+    void handler(request, response, next).catch(next);
+  };
+}
+
 function validateSelections(
   problem: Problem,
   selections: AttemptSelections | undefined | null
@@ -123,13 +135,14 @@ app.post(
       return sendBadRequest(response, "A problemId is required.");
     }
 
+    const trimmedProblemId = problemId.trim();
     const user = await storage.getUser(request.params.userId);
 
     if (!user) {
       return sendNotFound(response, "User not found.");
     }
 
-    const problem = await storage.getProblemById(problemId);
+    const problem = await storage.getProblemById(trimmedProblemId);
 
     if (!problem) {
       return sendNotFound(response, "Problem not found.");
