@@ -9,12 +9,25 @@ import {
 const API_BASE = "/api";
 
 async function handleJsonResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || "Request failed");
+  const text = await response.text();
+  let data: unknown = null;
+
+  try {
+    data = text ? (JSON.parse(text) as unknown) : null;
+  } catch {
+    data = text;
   }
 
-  return (await response.json()) as T;
+  if (!response.ok) {
+    const errorMessage =
+      (data && typeof data === "object" && "error" in data && (data as { error?: string }).error) ||
+      (typeof data === "string" ? data : null) ||
+      "Request failed";
+
+    throw new Error(errorMessage);
+  }
+
+  return data as T;
 }
 
 export async function createUser(name: string): Promise<UserProfile> {
