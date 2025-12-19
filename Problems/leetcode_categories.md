@@ -1,6 +1,5 @@
 | Category | Problem | Difficulty | LeetCode | Frequency |
 | --- | --- | --- | --- | --- |
-| Two Pointers | Meeting Rooms II | Medium | 253 | 63.5 |
 | Two Pointers | Remove Duplicates from Sorted Array | Easy | 26 | 53.7 |
 | Two Pointers | Find the Duplicate Number | Medium | 287 | 49.0 |
 | Two Pointers | Valid Palindrome | Easy | 125 | 49.0 |
