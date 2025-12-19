@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { createUser, fetchUser } from "./api";
-import { UserProfile } from "./types";
+import { createUser, fetchUser, resetUserProgress } from "./api";
+import { Attempt, UserProfile } from "./types";
 
 interface UserContextValue {
   user: UserProfile | null;
   loading: boolean;
   authenticate: (name: string) => Promise<void>;
   clearUser: () => void;
+  recordAttempt: (problemId: string, attempt: Attempt) => void;
+  resetProgress: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const STORAGE_KEY = "hi-code:userId";
@@ -47,12 +50,51 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
     setUser(null);
   };
 
+  const recordAttempt = (problemId: string, attempt: Attempt) => {
+    setUser((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const existingAttempts = current.attempts[problemId] ?? [];
+
+      return {
+        ...current,
+        attempts: {
+          ...current.attempts,
+          [problemId]: [...existingAttempts, attempt],
+        },
+      };
+    });
+  };
+
+  const refreshProfile = async () => {
+    if (!user) {
+      return;
+    }
+
+    const profile = await fetchUser(user.id);
+    setUser(profile);
+  };
+
+  const resetProgress = async () => {
+    if (!user) {
+      return;
+    }
+
+    const refreshed = await resetUserProgress(user.id);
+    setUser(refreshed);
+  };
+
   const value = useMemo(
     () => ({
       user,
       loading,
       authenticate,
       clearUser,
+      recordAttempt,
+      resetProgress,
+      refreshProfile,
     }),
     [user, loading]
   );

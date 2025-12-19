@@ -1,4 +1,10 @@
-import { ProblemDetail, ProblemSummary, UserProfile } from "./types";
+import {
+  AttemptEvaluation,
+  AttemptSelections,
+  ProblemDetail,
+  ProblemSummary,
+  UserProfile,
+} from "./types";
 
 const API_BASE = "/api";
 
@@ -37,4 +43,37 @@ export async function fetchProblems(): Promise<ProblemSummary[]> {
 export async function fetchProblem(problemId: string): Promise<ProblemDetail> {
   const response = await fetch(`${API_BASE}/problems/${encodeURIComponent(problemId)}`);
   return handleJsonResponse<ProblemDetail>(response);
+}
+
+export async function submitAttempt(
+  userId: string,
+  problemId: string,
+  selections: AttemptSelections
+): Promise<AttemptEvaluation> {
+  const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/attempts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ problemId, selections }),
+  });
+
+  return handleJsonResponse<AttemptEvaluation>(response);
+}
+
+export async function resetUserProgress(userId: string): Promise<UserProfile> {
+  const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/reset`, {
+    method: "POST",
+  });
+
+  const data = await handleJsonResponse<{ attempts: UserProfile["attempts"]; id: string; name: string; createdAt: string }>(
+    response
+  );
+
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: data.createdAt,
+    attempts: data.attempts,
+  };
 }
