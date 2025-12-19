@@ -52,6 +52,8 @@ Find the length of the longest substring that contains no repeating characters. 
 3. Input: "pwwkew" → Output: 3 (substring "wke")
    - The substring "wke" has no repeating characters and is longest
    - The window slides to maintain uniqueness
+4. Input: "abba" → Output: 2 ("ab" or "ba")
+5. Input: "tmmzuxt" → Output: 5 ("mzuxt")
 
 ### Pseudocode:
 ```
@@ -116,6 +118,8 @@ Given a string and integer k, find the length of the longest substring that can 
    - Optimal solution is window of size 4 where we replace one character
 3. Input: s = "ABCDE", k = 0 → Output: 1 (any single character)
    - No replacements allowed, so maximum is 1
+4. Input: s="AAAA", k=2 → Output: 4
+5. Input: s="ABBB", k=1 → Output: 4
 
 ### Pseudocode:
 ```
@@ -195,6 +199,8 @@ Find the maximum sum of any contiguous subarray of size k in the given array. Th
    - Third window: [4,1] = 5
 3. Input: arr = [1, 2, 3], k = 3 → Output: 6 (entire array)
    - Only one window possible: [1,2,3] = 6
+4. Input: [5,5,5,5,5], k=2 → Output: 10
+5. Input: [-1,-2,-3,-4], k=2 → Output: -3
 
 ### Pseudocode:
 ```
@@ -256,6 +262,8 @@ You are given a row of cards with point values. You can take exactly k cards, ta
    - Take any 2 cards: [2,2] = 4
 3. Input: cardPoints = [9,7,7,9,7,7,9], k = 7 → Output: 55
    - Take all cards: [9,7,7,9,7,7,9] = 55
+4. Input: [100,40,17,9,73,75], k=3 → Output: 248
+5. Input: [1,79,80,1,1,1,200,1], k=3 → Output: 202
 
 ### Pseudocode:
 ```
@@ -319,6 +327,8 @@ Find the maximum sum among all distinct subarrays of size k in the array. This r
    - [1,3,2] - all distinct = 6 (maximum)
 3. Input: nums = [5,5,5,5], k = 2 → Output: 0 (no valid subarrays)
    - All subarrays have duplicates, so sum = 0
+4. Input: [4,4,4,1,2,3], k=3 → Output: 6
+5. Input: [1,2,3,2,1,4,5], k=3 → Output: 11
 
 ### Pseudocode:
 ```
@@ -392,43 +402,114 @@ public int MaximumSubarraySum(int[] nums, int k) {
 ## 6. Adjacent Increasing Subarrays Detection II
 
 ### Description:
-This is a complex problem involving finding whether there exists an adjacent increasing subarray of at least length 3 that can be extended. The problem deals with detecting patterns where we have a sequence that increases and can potentially continue with additional elements.
+Given an integer array `nums`, determine whether there exists an integer `k ≥ 1` and an index `i` such that:
+
+• `nums[i .. i + k - 1]` is strictly increasing  
+• `nums[i + k .. i + 2k - 1]` is strictly increasing  
+• the two subarrays are adjacent and of equal length
+
+Return `true` if such a pair exists, otherwise return `false`.
+
+This is a Hard sliding window problem because we must efficiently detect two back to back increasing windows without brute force.
 
 ### Examples:
-1. Input: [1,2,3,4] → Output: True (subarray [1,2,3,4] is increasing)
-2. Input: [1,2,1,2,3] → Output: True (subarray [1,2,3] is increasing)
-3. Input: [1,2,1,2,1] → Output: False (no increasing subarray of length ≥ 3)
+1. Input: nums = [1,2,3,4]
+   Output: true
+   Explanation:
+   [1,2] and [3,4] are two adjacent increasing subarrays of equal length 2.
+
+2. Input: nums = [1,2,1,2,3]
+   Output: true
+   Explanation:
+   [1,2] (indices 2..3) and [2,3] (indices 3..4) are adjacent increasing subarrays of length 2.
+
+3. Input: nums = [1,2,1,2,1]
+   Output: false
+   Explanation:
+   No two adjacent strictly increasing subarrays of equal length exist.
+4. Input: [1,2,3,1,2,3] → Output: true
+   Explanation: [1,2,3] and [1,2,3] are adjacent increasing subarrays of length 3.
+
+5. Input: [5,4,3,2,1,2,3,4] → Output: false
+   Explanation: Increasing run exists but no adjacent equal length pair.
 
 ### Pseudocode:
 ```
-Initialize maxLen = 0, currentLen = 1
-For i from 1 to array length - 1:
-    If arr[i] > arr[i-1]:
-        currentLen++
-        maxLen = max(maxLen, currentLen)
-    Else:
-        currentLen = 1
+WHY SLIDING WINDOW?
+- We need to compare adjacent increasing segments efficiently
+- Precompute increasing run lengths from both directions
+- Slide a boundary and compare window sizes in O(n)
 
-Return maxLen >= 3
+If array length < 2:
+    return false
+
+Build incLeft:
+    incLeft[0] = 1
+    For i from 1 to n-1:
+        If nums[i] > nums[i-1]:
+            incLeft[i] = incLeft[i-1] + 1
+        Else:
+            incLeft[i] = 1
+
+Build incRight:
+    incRight[n-1] = 1
+    For i from n-2 down to 0:
+        If nums[i] < nums[i+1]:
+            incRight[i] = incRight[i+1] + 1
+        Else:
+            incRight[i] = 1
+
+For i from 0 to n-2:
+    If min(incLeft[i], incRight[i+1]) >= 1:
+        return true
+
+return false
 ```
 
 ### C# Solution:
 ```csharp
-public bool IsValid(int[] arr) {
-    if (arr.Length < 3) return false;
-    
-    int maxLen = 0;
-    int currentLen = 1;
-    
-    for (int i = 1; i < arr.Length; i++) {
-        if (arr[i] > arr[i - 1]) {
-            currentLen++;
-            maxLen = Math.Max(maxLen, currentLen);
+public bool HasAdjacentIncreasingSubarrays(int[] nums) {
+    int n = nums.Length;
+    if (n < 2) {
+        return false;
+    }
+
+    int[] incLeft = new int[n];
+    int[] incRight = new int[n];
+
+    // Build incLeft: length of increasing run ending at i
+    incLeft[0] = 1;
+    for (int i = 1; i < n; i++) {
+        if (nums[i] > nums[i - 1]) {
+            incLeft[i] = incLeft[i - 1] + 1;
         } else {
-            currentLen = 1;
+            incLeft[i] = 1;
         }
     }
-    
-    return maxLen >= 3;
+
+    // Build incRight: length of increasing run starting at i
+    incRight[n - 1] = 1;
+    for (int i = n - 2; i >= 0; i--) {
+        if (nums[i] < nums[i + 1]) {
+            incRight[i] = incRight[i + 1] + 1;
+        } else {
+            incRight[i] = 1;
+        }
+    }
+
+    // Check adjacent increasing subarrays
+    for (int i = 0; i < n - 1; i++) {
+        if (Math.Min(incLeft[i], incRight[i + 1]) >= 1) {
+            return true;
+        }
+    }
+
+    return false;
 }
 ```
+
+- **Time Complexity**: O(n)
+  We make three linear passes over the array: one to build incLeft, one to build incRight, and one to scan for a valid adjacent split.
+
+- **Space Complexity**: O(n)
+  Two auxiliary arrays incLeft and incRight are used to store increasing run lengths.
