@@ -1,5 +1,7 @@
-import type { AddressInfo } from "net";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { once } from "events";
+import { IncomingMessage, ServerResponse } from "http";
+import { PassThrough } from "stream";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createServer } from "../src";
 import { StorageProvider } from "../src/storage/storageProvider";
 import { Problem, ProblemSummary, User } from "../src/types";
@@ -85,73 +87,102 @@ function createTestServer() {
   return { app, storage };
 }
 
-async function parseJson(response: Response) {
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
-}
-
 describe("API endpoints", () => {
-  let baseUrl: string;
-  let shutdown: () => Promise<void>;
+  let app: ReturnType<typeof createServer>;
   let storage: InMemoryStorageProvider;
 
   beforeEach(() => {
     const created = createTestServer();
     storage = created.storage;
-    const server = created.app.listen(0);
-    const address = server.address() as AddressInfo;
-    baseUrl = `http://127.0.0.1:${address.port}`;
-    shutdown = () =>
-      new Promise((resolve) => {
-        server.close(() => resolve());
-      });
+    app = created.app;
   });
 
-  afterEach(async () => {
-    await shutdown();
-  });
+  async function sendRequest({
+    method,
+    path,
+    body,
+  }: {
+    method: string;
+    path: string;
+    body?: unknown;
+  }): Promise<{ status: number; body: any }> {
+    const socket = new PassThrough();
+    const req = new IncomingMessage(socket as any);
+    req.method = method;
+    req.url = path;
+    req.headers = {};
+
+    const res = new ServerResponse(req);
+    const chunks: Buffer[] = [];
+    const originalWrite = res.write.bind(res);
+    const originalEnd = res.end.bind(res);
+
+    res.assignSocket(socket as any);
+
+    res.write = (chunk: any, ...args: any[]) => {
+      if (chunk) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      return originalWrite(chunk, ...args);
+    };
+
+    res.end = (chunk: any, ...args: any[]) => {
+      if (chunk) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      return originalEnd(chunk, ...args);
+    };
+
+    if (body !== undefined) {
+      req._body = true;
+      req.body = body;
+    }
+
+    app.handle(req, res);
+
+    req.push(null);
+
+    await once(res, "finish");
+
+    const text = Buffer.concat(chunks).toString("utf8");
+    const parsed = text ? JSON.parse(text) : null;
+
+    return { status: res.statusCode, body: parsed };
+  }
 
   it("lists problems and omits answer keys", async () => {
-    const listResponse = await fetch(`${baseUrl}/api/problems`);
-    const listBody = await parseJson(listResponse);
+    const listResponse = await sendRequest({ method: "GET", path: "/api/problems" });
+    const listBody = listResponse.body;
     expect(listResponse.status).toBe(200);
     expect(listBody.problems).toHaveLength(1);
     expect(listBody.problems[0]).toMatchObject({ id: "two_sum", title: "Two Sum" });
 
-    const detailResponse = await fetch(`${baseUrl}/api/problems/two_sum`);
-    const detailBody = await parseJson(detailResponse);
+    const detailResponse = await sendRequest({ method: "GET", path: "/api/problems/two_sum" });
+    const detailBody = detailResponse.body;
     expect(detailBody.title).toBe("Two Sum");
     expect(detailBody.answerKey).toBeUndefined();
   });
 
   it("returns 404 for unknown problems", async () => {
-    const response = await fetch(`${baseUrl}/api/problems/unknown`);
-    const body = await parseJson(response);
+    const response = await sendRequest({ method: "GET", path: "/api/problems/unknown" });
+    const body = response.body;
     expect(response.status).toBe(404);
     expect(body.error).toMatch(/Problem not found/);
   });
 
   it("creates users and enforces validation", async () => {
-    const invalid = await fetch(`${baseUrl}/api/users`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "" }),
-    });
+    const invalid = await sendRequest({ method: "POST", path: "/api/users", body: { name: "" } });
     expect(invalid.status).toBe(400);
 
-    const response = await fetch(`${baseUrl}/api/users`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "Ada" }),
-    });
-    const body = await parseJson(response);
+    const response = await sendRequest({ method: "POST", path: "/api/users", body: { name: "Ada" } });
+    const body = response.body;
     expect(response.status).toBe(201);
     expect(body).toMatchObject({ name: "Ada" });
   });
 
   it("loads and guards user progress", async () => {
-    const missing = await fetch(`${baseUrl}/api/users/missing/progress`);
-    const missingBody = await parseJson(missing);
+    const missing = await sendRequest({ method: "GET", path: "/api/users/missing/progress" });
+    const missingBody = missing.body;
     expect(missing.status).toBe(404);
     expect(missingBody.error).toMatch(/User not found/);
 
@@ -159,8 +190,8 @@ describe("API endpoints", () => {
     user.attempts = { two_sum: [] };
     await storage.saveUser(user);
 
-    const response = await fetch(`${baseUrl}/api/users/${user.id}/progress`);
-    const body = await parseJson(response);
+    const response = await sendRequest({ method: "GET", path: `/api/users/${user.id}/progress` });
+    const body = response.body;
     expect(response.status).toBe(200);
     expect(body).toMatchObject({ id: user.id, name: "Grace" });
   });
@@ -168,17 +199,17 @@ describe("API endpoints", () => {
   it("validates attempts and records correctness", async () => {
     const user = await storage.createUser("Linus");
 
-    const missingProblemId = await fetch(`${baseUrl}/api/users/${user.id}/attempts`, {
+    const missingProblemId = await sendRequest({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemId: "", selections: null }),
+      path: `/api/users/${user.id}/attempts`,
+      body: { problemId: "", selections: null },
     });
     expect(missingProblemId.status).toBe(400);
 
-    const missingProblem = await fetch(`${baseUrl}/api/users/${user.id}/attempts`, {
+    const missingProblem = await sendRequest({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemId: "missing", selections: null }),
+      path: `/api/users/${user.id}/attempts`,
+      body: { problemId: "missing", selections: null },
     });
     expect(missingProblem.status).toBe(404);
 
@@ -189,10 +220,10 @@ describe("API endpoints", () => {
       spaceComplexities: "space-1",
     };
 
-    const invalidAttempt = await fetch(`${baseUrl}/api/users/${user.id}/attempts`, {
+    const invalidAttempt = await sendRequest({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemId: "two_sum", selections: invalidSelections }),
+      path: `/api/users/${user.id}/attempts`,
+      body: { problemId: "two_sum", selections: invalidSelections },
     });
     expect(invalidAttempt.status).toBe(400);
 
@@ -203,12 +234,12 @@ describe("API endpoints", () => {
       spaceComplexities: "space-1",
     };
 
-    const attemptResponse = await fetch(`${baseUrl}/api/users/${user.id}/attempts`, {
+    const attemptResponse = await sendRequest({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemId: "two_sum", selections: validSelections }),
+      path: `/api/users/${user.id}/attempts`,
+      body: { problemId: "two_sum", selections: validSelections },
     });
-    const attemptBody = await parseJson(attemptResponse);
+    const attemptBody = attemptResponse.body;
     expect(attemptResponse.status).toBe(201);
     expect(attemptBody.overallCorrect).toBe(true);
     expect(attemptBody.attempt.correctness.algorithms).toBe(true);
@@ -218,19 +249,19 @@ describe("API endpoints", () => {
   });
 
   it("requires a real user before recording attempts", async () => {
-    const response = await fetch(`${baseUrl}/api/users/ghost/attempts`, {
+    const response = await sendRequest({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ problemId: "two_sum", selections: {} }),
+      path: "/api/users/ghost/attempts",
+      body: { problemId: "two_sum", selections: {} },
     });
-    const body = await parseJson(response);
+    const body = response.body;
     expect(response.status).toBe(404);
     expect(body.error).toMatch(/User not found/);
   });
 
   it("resets attempts for a user", async () => {
-    const missingReset = await fetch(`${baseUrl}/api/users/ghost/reset`, { method: "POST" });
-    const missingBody = await parseJson(missingReset);
+    const missingReset = await sendRequest({ method: "POST", path: "/api/users/ghost/reset" });
+    const missingBody = missingReset.body;
     expect(missingReset.status).toBe(404);
     expect(missingBody.error).toMatch(/User not found/);
 
@@ -256,8 +287,8 @@ describe("API endpoints", () => {
     };
     await storage.saveUser(user);
 
-    const resetResponse = await fetch(`${baseUrl}/api/users/${user.id}/reset`, { method: "POST" });
-    const resetBody = await parseJson(resetResponse);
+    const resetResponse = await sendRequest({ method: "POST", path: `/api/users/${user.id}/reset` });
+    const resetBody = resetResponse.body;
     expect(resetResponse.status).toBe(200);
     expect(resetBody.attempts).toEqual({});
   });
