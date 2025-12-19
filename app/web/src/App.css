@@ -1,38 +1,218 @@
-:root {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  color: #0f172a;
-  background-color: #f8fafc;
-  line-height: 1.5;
-}
-
-body {
-  margin: 0;
-}
-
 .app-shell {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
+  background: var(--surface);
+  color: var(--text-primary);
 }
 
-.content {
-  max-width: 640px;
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+}
+
+.brand a {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.nav-links a {
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+}
+
+.nav-links a.active {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.app-content {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.panel {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-soft);
 }
 
-h1 {
-  margin-top: 0;
-  margin-bottom: 0.75rem;
-  font-size: 2rem;
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-p {
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stack.gap-md {
+  gap: 1rem;
+}
+
+.problem-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.problem-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.problem-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.problem-title {
   margin: 0;
-  color: #334155;
+}
+
+.problem-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.problem-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.section-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: var(--surface);
+}
+
+.section-card ul {
+  margin: 0.25rem 0 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.code-block {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--code-bg);
+  display: inline-block;
+}
+
+.ghost-button {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.primary {
+  background: var(--accent-strong);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+input {
+  border: 1px solid var(--border-subtle);
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+input:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: transparent;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.85rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.error-text {
+  color: #b91c1c;
+}
+
+a {
+  color: var(--accent-strong);
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
