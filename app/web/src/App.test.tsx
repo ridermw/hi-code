@@ -16,7 +16,7 @@ function setupFetch(responder: (url: string, init?: RequestInit) => Response | P
     return responder(url, init);
   });
 
-  global.fetch = mockFetch as unknown as typeof fetch;
+  globalThis.fetch = mockFetch as unknown as typeof fetch;
   return mockFetch;
 }
 

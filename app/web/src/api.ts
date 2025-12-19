@@ -20,9 +20,11 @@ async function handleJsonResponse<T>(response: Response): Promise<T> {
 
   if (!response.ok) {
     const errorMessage =
-      (data && typeof data === "object" && "error" in data && (data as { error?: string }).error) ||
-      (typeof data === "string" ? data : null) ||
-      "Request failed";
+      typeof data === "string"
+        ? data
+        : data && typeof data === "object" && "error" in data && typeof (data as { error?: unknown }).error === "string"
+        ? (data as { error: string }).error
+        : "Request failed";
 
     throw new Error(errorMessage);
   }

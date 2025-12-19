@@ -134,11 +134,11 @@ describe("API endpoints", () => {
     };
 
     if (body !== undefined) {
-      req._body = true;
-      req.body = body;
+      (req as any)._body = true;
+      (req as any).body = body;
     }
 
-    app.handle(req, res);
+    (app as any).handle(req, res);
 
     req.push(null);
 
