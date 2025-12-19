@@ -1,7 +1,7 @@
 | Category | Problem | Difficulty | LeetCode | Frequency |
 | --- | --- | --- | --- | --- |
 | Two Pointers | Container With Most Water | Medium | 11 | 63.5 |
-| Two Pointers | Two Sum Sorted | Medium | 167 |  |
+| Two Pointers | Two Sum Sorted | Medium | 167 | 34.6 |
 | Two Pointers | Three Sum | Medium | 15 | 49.0 |
 | Two Pointers | Triangle Numbers | Medium | 611 |  |
 | Two Pointers | Move Zeroes | Easy | 283 | 49.0 |
@@ -9,7 +9,7 @@
 | Two Pointers | Trapping Rain Water | Hard | 42 | 60.7 |
 | Sliding Window | Longest Substring Without Repeating Characters | Medium | 3 | 49.0 |
 | Sliding Window | Longest Repeating Character Replacement | Medium | 424 | 49.0 |
-| Sliding Window | Maximum Sum of Subarrays of Size K | Easy | 643 |  |
+| Sliding Window | Maximum Sum of Subarrays of Size K | Easy | 643 | 34.6 |
 | Sliding Window | Max Points You Can Obtain From Cards | Medium | 1423 |  |
 | Sliding Window | Max Sum of Distinct Subarrays Length K | Medium | 2461 |  |
 | Sliding Window | Adjacent Increasing Subarrays Detection II | Hard | 3350 |  |
@@ -20,13 +20,13 @@
 | Intervals | Employee Free Time | Hard | 759 | 49.0 |
 | Intervals | Meeting Rooms III | Hard | 2402 |  |
 | Stack | Valid Parentheses | Easy | 20 | 63.5 |
-| Stack | Decode String | Medium | 394 |  |
+| Stack | Decode String | Medium | 394 | 34.6 |
 | Stack | Longest Valid Parentheses | Hard | 32 |  |
 | Stack | Daily Temperatures | Medium | 739 |  |
 | Stack | Largest Rectangle in Histogram | Hard | 84 |  |
 | Linked List | Linked List Cycle | Easy | 141 |  |
 | Linked List | Palindrome Linked List | Easy | 234 |  |
-| Linked List | Remove Nth Node From End of List | Medium | 19 |  |
+| Linked List | Remove Nth Node From End of List | Medium | 19 | 34.6 |
 | Linked List | Reorder List | Medium | 143 |  |
 | Linked List | Swap Nodes in Pairs | Medium | 24 |  |
 | Binary Search | Apple Harvest Koko Eating Bananas | Medium | 875 |  |
@@ -36,7 +36,7 @@
 | Heap | Find K Closest Elements | Medium | 658 |  |
 | Heap | Merge K Sorted Lists | Hard | 23 | 49.0 |
 | Depth First Search | Maximum Depth of Binary Tree | Easy | 104 |  |
-| Depth First Search | Path Sum | Easy | 112 |  |
+| Depth First Search | Path Sum | Easy | 112 | 34.6 |
 | Depth First Search | Validate Binary Search Tree | Medium | 98 |  |
 | Depth First Search | Calculate Tilt | Easy | 563 |  |
 | Depth First Search | Diameter of a Binary Tree | Easy | 543 |  |
@@ -46,7 +46,7 @@
 | Depth First Search | Graph Valid Tree | Medium | 261 |  |
 | Depth First Search | Flood Fill | Easy | 733 |  |
 | Depth First Search | Number of Islands | Medium | 200 | 53.7 |
-| Depth First Search | Surrounded Regions | Medium | 130 |  |
+| Depth First Search | Surrounded Regions | Medium | 130 | 34.6 |
 | Depth First Search | Pacific Atlantic Water Flow | Medium | 417 |  |
 | Breadth First Search | Level Order Sum | Easy | 102 |  |
 | Breadth First Search | Rightmost Node | Medium | 199 |  |
@@ -56,16 +56,16 @@
 | Breadth First Search | Rotting Oranges | Medium | 994 |  |
 | Breadth First Search | Zero One Matrix | Medium | 542 |  |
 | Breadth First Search | Bus Routes | Hard | 815 |  |
-| Backtracking | Word Search | Medium | 79 |  |
-| Backtracking | Subsets | Medium | 78 |  |
+| Backtracking | Word Search | Medium | 79 | 34.6 |
+| Backtracking | Subsets | Medium | 78 | 34.6 |
 | Backtracking | Generate Parentheses | Medium | 22 | 43.0 |
-| Backtracking | Combination Sum | Medium | 39 |  |
-| Graphs | Course Schedule | Medium | 207 |  |
-| Graphs | Course Schedule Two | Medium | 210 |  |
+| Backtracking | Combination Sum | Medium | 39 | 34.6 |
+| Graphs | Course Schedule | Medium | 207 | 34.6 |
+| Graphs | Course Schedule Two | Medium | 210 | 34.6 |
 | Graphs | Alien Dictionary | Hard | 269 |  |
 | Dynamic Programming | Counting Bits | Easy | 338 |  |
 | Dynamic Programming | Decode Ways | Medium | 91 |  |
-| Dynamic Programming | Maximal Square | Medium | 221 |  |
+| Dynamic Programming | Maximal Square | Medium | 221 | 34.6 |
 | Dynamic Programming | Unique Paths | Medium | 62 |  |
 | Dynamic Programming | Longest Increasing Subsequence | Medium | 300 |  |
 | Dynamic Programming | Word Break | Medium | 139 |  |
@@ -76,8 +76,8 @@
 | Trie | Implement Trie Methods | Medium | 208 |  |
 | Trie | Prefix Matching | Medium | 820 |  |
 | Prefix Sum | Count Vowels in Substrings | Medium | 2063 |  |
-| Prefix Sum | Subarray Sum Equals K | Medium | 560 |  |
+| Prefix Sum | Subarray Sum Equals K | Medium | 560 | 34.6 |
 | Matrices | Spiral Matrix | Medium | 54 | 49.0 |
 | Matrices | Rotate Image | Medium | 48 |  |
-| Matrices | Set Matrix Zeroes | Medium | 73 |  |
+| Matrices | Set Matrix Zeroes | Medium | 73 | 34.6 |
 | Design | LFU Cache | Hard | 460 |  |
