@@ -1,30 +1,53 @@
-# HI Code App Scaffold
+# HI Code application
 
-This `app` directory contains the foundational architecture for a new full stack TypeScript application. It separates shared domain models from the Node server and the React web frontend so each part can evolve independently while reusing core types.
+Full-stack TypeScript project combining a small Express API with a Vite-powered React UI. The backend persists quiz progress to disk while the frontend provides the interactive experience.
 
 ## Folder layout
 - `packages/domain/` – Shared TypeScript domain types that can be consumed by Node, web, and future React Native clients.
-- `server/` – Minimal Node + TypeScript server scaffold with room for future API routes and data sources.
-- `web/` – Vite + React + TypeScript frontend scaffold ready for upcoming quiz flows and UI screens.
+- `server/` – Express server that exposes quiz APIs, persists users to disk, and serves the built React app in production.
+- `web/` – Vite + React + TypeScript frontend for browsing problems, attempting quizzes, and resetting progress.
 
-## Reuse across platforms
-The domain package exports pure TypeScript types with no platform-specific dependencies. This makes it safe to import in the Node server, the React web app, and a future React Native app without branching logic.
+## Setup
+From the `app` directory:
 
-## Running projects in isolation
-Each project manages its own tooling and scripts inside its folder.
-
-### Server
 ```bash
-cd app/server
-npm install
+npm run install:all
+```
+
+This installs dependencies for the domain package, server, and web app. If you only want one side, run `npm install` inside the specific folder instead.
+
+## Development
+Run the server and client together with a single command (server on port 3000, Vite on 5173 with proxying to the API):
+
+```bash
 npm run dev
 ```
 
-### Web
+You can still run each side individually if desired:
+
+- Server: `npm run dev --prefix server`
+- Web: `npm run dev --prefix web`
+
+## Production build & serve
+Build the React app and the server in one go:
+
 ```bash
-cd app/web
-npm install
-npm run dev
+npm run build
 ```
 
-Both projects run independently, keeping backend and frontend workflows decoupled while sharing the domain models from `packages/domain`.
+Then start the compiled server (serves the React build from `/web/dist`):
+
+```bash
+npm start
+```
+
+## Testing
+- Server: `npm test --prefix server`
+- Web: `npm test --prefix web`
+- Combined: `npm test`
+
+## Architecture overview
+- **API layer**: Express routes live in `server/src/index.ts`. They validate inputs, load quiz metadata from `server/data`, and persist user progress via a pluggable storage provider.
+- **Static hosting**: When built, the server also serves the React bundle from `web/dist` so a single Node process can deliver both API and UI.
+- **Frontend**: The React UI (in `web/src`) communicates with the API via `fetch`, stores the active user in localStorage, and keeps attempt history in sync with the backend.
+- **Shared model**: Domain types live in `packages/domain` to keep future clients aligned on shape without duplicating definitions.
