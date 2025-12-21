@@ -826,13 +826,10 @@ In an infinite chess board with coordinates from -infinity to +infinity, you hav
    - Cannot reach (1,1) in one move
    - Minimum 2 moves
 
-5. Input: x = 5, y = 1, Output = 2  
-   - (0,0) → (2,1) → (5,1) is invalid (not L-shape from (2,1))
-   - Valid: (0,0) → (2,1) → (4,2) → ... takes more
-   - Optimal: (0,0) → (1,2) → (3,1) → (5,0) or find better path
-   - Actually (0,0) → (2,1) → (4,0) → (5,2)... complex
-   - Answer is 2: (0,0) → (1,2) → (3,3)... no
-   - Correct path needs verification: minimum is 2
+5. Input: x = 5, y = 1, Output = 4  
+   - One optimal path: (0,0) → (2,1) → (4,2) → (6,3) → (5,1)
+   - Cannot reach (5,1) in 2 moves
+   - Minimum moves required: 4
 
 ### Pseudocode:
 ```

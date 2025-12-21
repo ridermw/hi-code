@@ -204,13 +204,11 @@ Given an integer array `nums`, return the length of the longest strictly increas
    - Length 1
 
 4. Input: nums = [1,3,6,7,9,4,10,5,6], Output = 6  
-   - LIS: [1,3,4,5,6,9] or [1,3,6,7,9,10]
-   - Actually [1,3,6,7,9,10] = 6
+   - LIS: [1,3,6,7,9,10] (length 6)
 
 5. Input: nums = [3,5,6,2,5,4,19,5,6,7,12], Output = 6  
    - Multiple LIS exist
-   - Example: [3,5,6,7,12,19] = 6? Let me check: [3,5,6,19] = 4
-   - Actually: [2,4,5,6,7,12] = 6 or [2,5,6,7,12,19] = 6
+   - Example: [2,4,5,6,7,12] (length 6)
 
 ### Pseudocode:
 ```

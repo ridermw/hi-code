@@ -319,10 +319,10 @@ Given an array of `words`, return the length of the shortest reference string `s
    - "me" is suffix of "time"
    - Encode as "time#" (length = 5)
 
-5. Input: words = ["abc", "bc", "c", "def", "ef", "f"], Output = 10  
+5. Input: words = ["abc", "bc", "c", "def", "ef", "f"], Output = 8  
    - "c" is suffix of "bc" which is suffix of "abc" → "abc#"
    - "f" is suffix of "ef" which is suffix of "def" → "def#"
-   - Combined: "abc#def#" (length = 10)
+   - Combined: "abc#def#" (length = 8)
 
 ### Pseudocode:
 ```

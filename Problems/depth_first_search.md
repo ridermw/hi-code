@@ -355,12 +355,12 @@ There is an `m x n` rectangular island that borders both the Pacific Ocean and A
    - Most cells can reach both oceans via flow paths
    - 7 cells total can reach both
 
-4. Input: heights = [[3,3,3],[3,1,3],[0,2,4]], Output = [[0,0],[0,1],[0,2],[1,0],[1,2],[2,2]]  
+4. Input: heights = [[3,3,3],[3,1,3],[0,2,4]], Output = [[0,0],[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[2,2]]  
    - 3x3 grid with valley in center
    - Center (1,1) with height 1 can only reach via higher cells
    - 6 cells can reach both oceans
 
-5. Input: heights = [[1,2,3,4],[12,13,14,5],[11,16,15,6],[10,9,8,7]], Output = [[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0]]  
+5. Input: heights = [[1,2,3,4],[12,13,14,5],[11,16,15,6],[10,9,8,7]], Output = [[0,3],[1,0],[1,1],[1,2],[1,3],[2,0],[2,1],[2,2],[2,3],[3,0],[3,1],[3,2],[3,3]]  
    - 4x4 grid with increasing perimeter, high center
    - Water flows from high center to edges
    - 10 cells can reach both oceans
@@ -544,13 +544,10 @@ Given the `root` of a binary tree, return the sum of every tree node's tilt. The
 4. Input: root = [1], Output = 0  
    - Single node: tilt = |0 - 0| = 0
 
-5. Input: root = [1,2,null], Output = 1  
-   - Node 2: tilt = 0
-   - Node 1: tilt = |2 - 0| = 2... wait
-   - Actually: left_sum=2, right_sum=0, tilt=2
-   - No, node 2 is leaf, contributes 2 to sum
-   - Node 1 tilt = |2-0| = 2? Let me recalculate
-   - Total should be 1 based on problem
+5. Input: root = [1,2,null], Output = 2  
+   - Node 2: tilt = |0 - 0| = 0
+   - Node 1: left_sum = 2, right_sum = 0, tilt = 2
+   - Total tilt = 2
 
 ### Pseudocode:
 ```
@@ -619,11 +616,9 @@ Given the `root` of a binary tree, return the length of the diameter of the tree
    - Single node, no edges
    - Diameter = 0
 
-4. Input: root = [1,2,3,4,5,null,null,6,7], Output = 5  
-   - Longest path: 6 → 4 → 2 → 5 → ... no
-   - Actually: 6 → 4 → 2 → 1 → 3 (4 edges) or similar
-   - Need to trace through tree structure
-   - Path through node 2: left_height + right_height
+4. Input: root = [1,2,3,4,5,null,null,6,7], Output = 4  
+   - Longest path: 6 → 4 → 2 → 1 → 3 (4 edges)
+   - Path goes from leftmost leaf through root to right child
 
 5. Input: root = [1,null,2,null,3,null,4], Output = 3  
    - Skewed tree (right-only)
