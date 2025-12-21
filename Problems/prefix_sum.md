@@ -280,3 +280,104 @@ public int[] ProductExceptSelf(int[] nums) {
 **Time Complexity**: O(n) where n is the length of the array. Two passes through the array.
 
 **Space Complexity**: O(1) excluding the output array. Only uses constant extra space.
+
+---
+
+## Count Vowel Strings in Ranges | LeetCode 2063 | Medium
+You are given a 0-indexed array of strings `words` and a 2D array of integers `queries`. Each query `queries[i] = [li, ri]` asks us to find the number of strings present in the range `li` to `ri` (both inclusive) of `words` that start and end with a vowel. Return an array `ans` of size `queries.length`, where `ans[i]` is the answer to the ith query.
+
+**Note:** The vowel letters are 'a', 'e', 'i', 'o', and 'u'.
+
+### Examples:
+1. Input: words = ["aba","bcb","ece","aa","e"], queries = [[0,2],[1,4],[1,1]], Output = [2,3,0]  
+   - Query [0,2]: words[0]="aba" (starts 'a', ends 'a') ✓, words[1]="bcb" ✗, words[2]="ece" (starts 'e', ends 'e') ✓ → count = 2
+   - Query [1,4]: words[1]="bcb" ✗, words[2]="ece" ✓, words[3]="aa" ✓, words[4]="e" ✓ → count = 3
+   - Query [1,1]: words[1]="bcb" ✗ → count = 0
+
+2. Input: words = ["a","e","i"], queries = [[0,2],[0,1],[2,2]], Output = [3,2,1]  
+   - All three words start and end with vowels
+   - Query [0,2]: all 3 words ✓
+   - Query [0,1]: first 2 words ✓
+   - Query [2,2]: just "i" ✓
+
+3. Input: words = ["hello","world"], queries = [[0,1]], Output = [0]  
+   - "hello" starts with 'h' (not vowel) ✗
+   - "world" starts with 'w' (not vowel) ✗
+   - Count = 0
+
+4. Input: words = ["apple","orange"], queries = [[0,0],[1,1],[0,1]], Output = [1,1,2]  
+   - "apple" starts 'a', ends 'e' ✓
+   - "orange" starts 'o', ends 'e' ✓
+   - Query [0,0]: 1, Query [1,1]: 1, Query [0,1]: 2
+
+5. Input: words = ["abc","def","ghi"], queries = [[0,2]], Output = [0]  
+   - None of the words start and end with vowels
+   - Count = 0
+
+### Pseudocode:
+```
+WHY PREFIX SUM?
+- Multiple range queries → prefix sum optimal
+- Precompute count of valid words up to each index
+- Range [l, r] query = prefix[r] - prefix[l-1]
+- Build prefix array: O(n), each query: O(1)
+- Total: O(n + q) instead of O(n × q) brute force
+
+1. Helper function isVowel(char c):
+   - Return c in {'a', 'e', 'i', 'o', 'u'}
+
+2. Helper function startsAndEndsWithVowel(string word):
+   - Return isVowel(word[0]) && isVowel(word[last])
+
+3. Build prefix sum array:
+   - prefix[0] = 0
+   - For i from 0 to n-1:
+     - prefix[i+1] = prefix[i] + (1 if valid else 0)
+
+4. Process queries:
+   - For each query [l, r]:
+     - answer = prefix[r+1] - prefix[l]
+
+5. Return answers
+```
+
+### C# Solution:
+```csharp
+public int[] VowelStrings(string[] words, int[][] queries) {
+    int n = words.Length;
+    int[] prefix = new int[n + 1];
+    
+    // Build prefix sum
+    for (int i = 0; i < n; i++) {
+        prefix[i + 1] = prefix[i];
+        if (StartsAndEndsWithVowel(words[i])) {
+            prefix[i + 1]++;
+        }
+    }
+    
+    // Process queries
+    int[] result = new int[queries.Length];
+    for (int i = 0; i < queries.Length; i++) {
+        int left = queries[i][0];
+        int right = queries[i][1];
+        result[i] = prefix[right + 1] - prefix[left];
+    }
+    
+    return result;
+}
+
+private bool StartsAndEndsWithVowel(string word) {
+    if (string.IsNullOrEmpty(word)) return false;
+    return IsVowel(word[0]) && IsVowel(word[word.Length - 1]);
+}
+
+private bool IsVowel(char c) {
+    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n + q) where n is the number of words and q is the number of queries. Building prefix sum is O(n), each query is O(1).
+
+**Space Complexity**: O(n) for the prefix sum array.

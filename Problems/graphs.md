@@ -70,7 +70,7 @@ There are a total of `numCourses` courses you have to take, labeled from `0` to 
 
 3. Input: numCourses = 5, prerequisites = [[1,4],[2,4],[3,1],[3,2]], Output = true  
    - 5 courses: 0, 1, 2, 3, 4
-   - Dependencies: 1→4, 2→4, 3→1, 3→2
+   - Dependencies: 4→1, 4→2, 1→3, 2→3
    - Valid order: [0, 4, 1, 2, 3] or [4, 0, 1, 2, 3]
    - No cycles
 
@@ -91,7 +91,7 @@ There are a total of `numCourses` courses you have to take, labeled from `0` to 
 ### Pseudocode:
 ```
 WHY TOPOLOGICAL SORT?
-- Prerequisites form directed graph: edge a→b means "take a before b"
+- Prerequisites form directed graph: edge prereq → course means "take prereq before course"
 - Cycle = circular dependency = impossible to finish
 - Topological sort only exists for DAGs (acyclic graphs)
 - Use in-degree counting: process nodes with no prerequisites first

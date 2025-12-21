@@ -402,7 +402,7 @@ public int MaximumSubarraySum(int[] nums, int k) {
 ## 6. [Hard] Adjacent Increasing Subarrays Detection II (LeetCode #3350)
 
 ### Description:
-Given an integer array `nums`, determine whether there exists an integer `k ≥ 1` and an index `i` such that:
+Given an integer array `nums`, determine whether there exists an integer `k ≥ 2` and an index `i` such that:
 
 • `nums[i .. i + k - 1]` is strictly increasing  
 • `nums[i + k .. i + 2k - 1]` is strictly increasing  
@@ -428,10 +428,10 @@ This is a Hard sliding window problem because we must efficiently detect two bac
    Explanation:
    No two adjacent strictly increasing subarrays of equal length exist.
 4. Input: [1,2,3,1,2,3] → Output: true
-   Explanation: [1,2,3] and [1,2,3] are adjacent increasing subarrays of length 3.
+    Explanation: [1,2,3] and [1,2,3] are adjacent increasing subarrays of length 3.
 
 5. Input: [5,4,3,2,1,2,3,4] → Output: false
-   Explanation: Increasing run exists but no adjacent equal length pair.
+    Explanation: Increasing run exists but no adjacent equal length pair of length at least 2.
 
 ### Pseudocode:
 ```
@@ -460,8 +460,9 @@ Build incRight:
             incRight[i] = 1
 
 For i from 0 to n-2:
-    If min(incLeft[i], incRight[i+1]) >= 1:
-        return true
+    // We need the same length k for both runs, with k >= 2
+    If min(incLeft[i], incRight[i+1]) >= 2:
+        return true  // there exists k (choose k = 2..min) giving adjacent increasing runs
 
 return false
 ```

@@ -209,11 +209,10 @@ There are `n` gas stations along a circular route, where the amount of gas at th
    - Net: [0,-1,0]
    - Cannot complete from any start
 
-5. Input: gas = [4,5,2,6,5,3], cost = [3,2,7,3,2,9], Output = 5  
-   - Net: [1,3,-5,3,3,-6]
-   - Total net = -1, wait that doesn't work
-   - Recalculating: total gas = 25, total cost = 26
-   - Actually impossible
+5. Input: gas = [4,5,2,6,5,3], cost = [3,2,7,3,2,9], Output = -1  
+   - Net per station: [1,3,-5,3,3,-6]
+   - Total gas = 25, total cost = 26 → overall deficit
+   - Since total gas < total cost, completing the circuit is impossible
 
 ### Pseudocode:
 ```

@@ -188,7 +188,8 @@ Given a string consisting of opening and closing parentheses, find the length of
 2. Input = ")()())", Output = 4 since the longest valid substring is "()()" with a length of 4.  
 3. Input = "", Output = 0 since there are no valid parentheses in the string.  
 4. Input = "()(()", Output = 2  
-5. Input = "((())())(()(()))", Output = 8  
+5. Input = "((())())(()(()))", Output = 16  
+   - Entire string is valid, length 16
 
 ### Pseudocode:
 ```
