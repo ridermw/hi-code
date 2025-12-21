@@ -291,3 +291,130 @@ public class WordDictionary {
 **Time Complexity**: O(m) for addWord. O(m) for search with no dots, O(26^k × m) for search with k dots in worst case.
 
 **Space Complexity**: O(n × m × 26) for storing n words of average length m.
+
+---
+
+## Short Encoding of Words | LeetCode 820 | Medium
+A valid encoding of an array of `words` is any reference string `s` and array of indices `indices` such that:
+- `words.length == indices.length`
+- The reference string `s` ends with the '#' character.
+- For each index `indices[i]`, the substring of `s` starting from `indices[i]` and up to (but not including) the next '#' character is equal to `words[i]`.
+
+Given an array of `words`, return the length of the shortest reference string `s` possible of any valid encoding of `words`.
+
+### Examples:
+1. Input: words = ["time", "me", "bell"], Output = 10  
+   - "me" is suffix of "time", so we can encode both with "time#"
+   - "bell" is independent, needs "bell#"
+   - Combined: "time#bell#" or "bell#time#" (length = 10)
+
+2. Input: words = ["t"], Output = 2  
+   - Single word: "t#" (length = 2)
+
+3. Input: words = ["time", "atime", "btime"], Output = 12  
+   - "time" is suffix of both "atime" and "btime"
+   - Optimal: "atime#btime#" (length = 12)
+   - Or: "btime#atime#" (same length)
+
+4. Input: words = ["me", "time"], Output = 5  
+   - "me" is suffix of "time"
+   - Encode as "time#" (length = 5)
+
+5. Input: words = ["abc", "bc", "c", "def", "ef", "f"], Output = 10  
+   - "c" is suffix of "bc" which is suffix of "abc" → "abc#"
+   - "f" is suffix of "ef" which is suffix of "def" → "def#"
+   - Combined: "abc#def#" (length = 10)
+
+### Pseudocode:
+```
+WHY TRIE (REVERSE)?
+- Need to identify words that are suffixes of other words
+- If word A is suffix of word B, we only need to encode B
+- Build trie with reversed words (suffix tree)
+- Only count leaf nodes (words not suffix of any other)
+- O(n × m) time where n = number of words, m = average length
+
+1. Build trie with reversed words
+2. For each word in trie:
+   - If word is a leaf (no children after it), count its length + 1 (for '#')
+   - If word has children, it's a suffix of another word (skip)
+3. Sum all lengths
+Alternative approach using Set:
+1. Add all words to set
+2. For each word, remove all its suffixes from set
+3. Sum lengths of remaining words + 1 for each
+```
+
+### C# Solution (Set Approach):
+```csharp
+public int MinimumLengthEncoding(string[] words) {
+    HashSet<string> wordSet = new HashSet<string>(words);
+    
+    // Remove all suffixes
+    foreach (string word in words) {
+        for (int i = 1; i < word.Length; i++) {
+            wordSet.Remove(word.Substring(i));
+        }
+    }
+    
+    // Sum remaining word lengths + '#'
+    int length = 0;
+    foreach (string word in wordSet) {
+        length += word.Length + 1;
+    }
+    
+    return length;
+}
+```
+
+### C# Solution (Trie Approach):
+```csharp
+public int MinimumLengthEncoding(string[] words) {
+    TrieNode root = new TrieNode();
+    Dictionary<TrieNode, int> nodes = new Dictionary<TrieNode, int>();
+    
+    // Insert reversed words
+    for (int i = 0; i < words.Length; i++) {
+        string word = words[i];
+        TrieNode current = root;
+        
+        for (int j = word.Length - 1; j >= 0; j--) {
+            char c = word[j];
+            if (current.children[c - 'a'] == null) {
+                current.children[c - 'a'] = new TrieNode();
+            }
+            current = current.children[c - 'a'];
+        }
+        
+        nodes[current] = i;
+    }
+    
+    // Count leaf nodes (words not suffix of others)
+    int length = 0;
+    foreach (var pair in nodes) {
+        TrieNode node = pair.Key;
+        if (IsLeaf(node)) {
+            length += words[pair.Value].Length + 1;
+        }
+    }
+    
+    return length;
+}
+
+private bool IsLeaf(TrieNode node) {
+    foreach (var child in node.children) {
+        if (child != null) return false;
+    }
+    return true;
+}
+
+private class TrieNode {
+    public TrieNode[] children = new TrieNode[26];
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n × m) where n is number of words and m is average word length.
+
+**Space Complexity**: O(n × m) for the set or trie structure.

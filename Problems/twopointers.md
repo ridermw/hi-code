@@ -203,6 +203,7 @@ WHY TWO POINTERS?
 Sort array  // O(n log n)
 For i from 0 to length - 3:
     If i > 0 and array[i] == array[i-1]: continue  // Skip duplicates
+    If array[i] > 0: break  // Early stop: remaining numbers are positive
     
     Initialize left = i + 1, right = array.length - 1
     
@@ -271,7 +272,7 @@ Count the number of valid triangles that can be formed with given array elements
 ### Examples:
 1. Input: [2,2,3,4] → Output: 3 (Valid triangles: [2,3,4], [2,3,4], [2,2,3])
 2. Input: [4,3,2,1] → Output: 0 (No valid triangles)
-3. Input: [1,2,3,4,5] → Output: 7 (Valid triangles)
+3. Input: [1,2,3,4,5] → Output: 3 (Valid triangles: [2,3,4], [2,4,5], [3,4,5])
 4. Input: [1,1,1,1] → Output: 4 (All triplets form a triangle)
 5. Input: [2,2,3,4,4] → Output: 8 (Multiple triangles across duplicates)
 
