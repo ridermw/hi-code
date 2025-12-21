@@ -2,8 +2,7 @@
 
 ## Trie Concept
 
-A Trie (prefix tree) is a tree data structure used to store and retrieve strings efficiently. Each node represents a character, and paths from root to nodes spell out words. Tries excel at prefix-based operations: checking if a word exists, finding all words with a given prefix, and autocomplete functionality.
-### What is a Trie
+### What is a Trie?
 A Trie (prefix tree) is a tree data structure used to store and retrieve strings efficiently. Each node represents a character, and paths from root to nodes spell out words. Tries excel at prefix-based operations: checking if a word exists, finding all words with a given prefix, and autocomplete functionality.
 
 ### Core Operations:

@@ -145,6 +145,7 @@ Given `n` pairs of parentheses, write a function to generate all combinations of
 1. Input: n = 3, Output = ["((()))","(()())","(())()","()(())","()()()"]  
    - 3 pairs: 6 characters total (3 open, 3 close)
    - 5 valid combinations (Catalan number C_3 = 5)
+   - Catalan numbers count the number of valid parentheses combinations for n pairs
    - All must be balanced and well-formed
 
 2. Input: n = 1, Output = ["()"]  

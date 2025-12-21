@@ -78,10 +78,10 @@ Given an integer array `nums` and an integer `k`, return the kth largest element
    - Heap maintains [3,4,5,6,7] of size 5
    - Root is 3
 
-5. Input: nums = [3,2,3,1,2,4,5,5,6,7,7,8,2,3,1,1,1,10,11,5,6,2,4,7,8,5,6], k = 20, Output = 3  
+5. Input: nums = [3,2,3,1,2,4,5,5,6,7,7,8,2,3,1,1,1,10,11,5,6,2,4,7,8,5,6], k = 20, Output = 2  
    - Large array with duplicates (27 elements)
-   - Sorted: [11,10,8,8,7,7,7,6,6,6,5,5,5,5,4,4,3,3,3,3,2,2,2,2,1,1,1]
-   - 20th largest is 3
+   - Sorted: [11,10,8,8,7,7,7,6,6,6,5,5,5,5,4,4,3,3,3,2,2,2,2,1,1,1,1]
+   - 20th largest is 2
    - Maintain heap of size 20, root gives answer
 
 ### Pseudocode:
