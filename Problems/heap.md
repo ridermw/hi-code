@@ -316,7 +316,7 @@ Given a sorted integer array `arr`, two integers `k` and `x`, return the `k` clo
    - Closest: 4 (dist 1), then 3 and 3 (dist 2), then ties
    - Result: [3,3,4]
 
-5. Input: arr = [1,3,5,7,9,11,13,15,17,19], k = 5, x = 10, Output = [7,9,11,13,15]  
+5. Input: arr = [1,3,5,7,9,11,13,15,17,19], k = 5, x = 10, Output = [5,7,9,11,13]  
    - 10 elements, need 5 closest to 10
    - Distances: |1-10|=9, |3-10|=7, |5-10|=5, |7-10|=3, |9-10|=1, |11-10|=1, |13-10|=3, |15-10|=5, |17-10|=7, |19-10|=9
    - Closest: 9 (dist 1), 11 (dist 1), 7 (dist 3), 13 (dist 3), then 5 or 15 (dist 5)

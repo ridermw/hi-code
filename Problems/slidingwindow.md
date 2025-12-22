@@ -113,7 +113,7 @@ Given a string and integer k, find the length of the longest substring that can 
 1. Input: s = "ABAB", k = 2 → Output: 4 (substring "AAAA" or "BBBB")
    - We can replace 2 characters to make all same
    - Window size 4: "ABAB" → can become "AAAA" or "BBBB"
-2. Input: s = "AABABBA", k = 1 → Output: 4 (substring "AABA" or "BABA")
+2. Input: s = "AABABBA", k = 1 → Output: 4 (substring "AABA" or "BABB")
    - We can make at most one replacement
    - Optimal solution is window of size 4 where we replace one character
 3. Input: s = "ABCDE", k = 0 → Output: 1 (any single character)
@@ -327,8 +327,8 @@ Find the maximum sum among all distinct subarrays of size k in the array. This r
    - [1,3,2] - all distinct = 6 (maximum)
 3. Input: nums = [5,5,5,5], k = 2 → Output: 0 (no valid subarrays)
    - All subarrays have duplicates, so sum = 0
-4. Input: [4,4,4,1,2,3], k=3 → Output: 6
-5. Input: [1,2,3,2,1,4,5], k=3 → Output: 11
+4. Input: [4,4,4,1,2,3], k=3 → Output: 7
+5. Input: [1,2,3,2,1,4,5], k=3 → Output: 10
 
 ### Pseudocode:
 ```
@@ -421,7 +421,7 @@ This is a Hard sliding window problem because we must efficiently detect two bac
 2. Input: nums = [1,2,1,2,3]
    Output: true
    Explanation:
-   [1,2] (indices 2..3) and [2,3] (indices 3..4) are adjacent increasing subarrays of length 2.
+   [1,2] (indices 0..1) and [1,2] (indices 2..3) are adjacent increasing subarrays of length 2.
 
 3. Input: nums = [1,2,1,2,1]
    Output: false
@@ -430,8 +430,8 @@ This is a Hard sliding window problem because we must efficiently detect two bac
 4. Input: [1,2,3,1,2,3] → Output: true
     Explanation: [1,2,3] and [1,2,3] are adjacent increasing subarrays of length 3.
 
-5. Input: [5,4,3,2,1,2,3,4] → Output: false
-    Explanation: Increasing run exists but no adjacent equal length pair of length at least 2.
+5. Input: [5,4,3,2,1,2,3,4] → Output: true
+    Explanation: [1,2] and [3,4] are adjacent increasing subarrays of length 2.
 
 ### Pseudocode:
 ```
@@ -440,7 +440,7 @@ WHY SLIDING WINDOW?
 - Precompute increasing run lengths from both directions
 - Slide a boundary and compare window sizes in O(n)
 
-If array length < 2:
+If array length < 4:
     return false
 
 Build incLeft:
@@ -471,7 +471,7 @@ return false
 ```csharp
 public bool HasAdjacentIncreasingSubarrays(int[] nums) {
     int n = nums.Length;
-    if (n < 2) {
+    if (n < 4) {
         return false;
     }
 
@@ -500,7 +500,7 @@ public bool HasAdjacentIncreasingSubarrays(int[] nums) {
 
     // Check adjacent increasing subarrays
     for (int i = 0; i < n - 1; i++) {
-        if (Math.Min(incLeft[i], incRight[i + 1]) >= 1) {
+        if (Math.Min(incLeft[i], incRight[i + 1]) >= 2) {
             return true;
         }
     }

@@ -69,7 +69,7 @@ Given two sorted arrays `nums1` and `nums2` of size m and n respectively, return
    - Median is average of middle two: (2+3)/2 = 2.5
    - Final partition: nums1 at index 2 (left=[1,2], right=[]), nums2 at index 0 (left=[], right=[3,4])
    - Left max = max(2, -∞) = 2, Right min = min(∞, 3) = 3
-   - Median = (2 + 3) / 2 = 2.5
+   - Median = (2 + 3) / 2.0 = 2.5
 
 3. Input: nums1 = [1,5,9,11,15], nums2 = [2,3,6,7,8], Output = 6.5  
    - Combined sorted: [1,2,3,5,6,7,8,9,11,15] (length=10, even)
