@@ -3,6 +3,7 @@ import "./App.css";
 import { Router, RouteSwitch, useNavigation } from "./router";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
+import { FlashcardsPage } from "./pages/FlashcardsPage";
 import { ProblemsPage } from "./pages/ProblemsPage";
 import { ProblemDetailPage } from "./pages/ProblemDetailPage";
 import { ThemeProvider } from "./theme";
@@ -34,6 +35,7 @@ function AppShell(): JSX.Element {
           { path: "/login", element: <LoginPage /> },
           { path: "/problems", element: <ProtectedRoute><ProblemsPage /></ProtectedRoute> },
           { path: "/problems/:id", element: <ProtectedRoute><ProblemDetailPage /></ProtectedRoute> },
+          { path: "/flashcards", element: <ProtectedRoute><FlashcardsPage /></ProtectedRoute> },
           { path: "/", element: <ProtectedRoute><ProblemsPage /></ProtectedRoute> },
         ]}
         fallback={<LoginPage />}

@@ -81,6 +81,27 @@ export function createServer(storage: StorageProvider): express.Express {
   );
 
   app.get(
+    "/api/flashcards",
+    asyncHandler(async (_request: Request, response: Response) => {
+      const categories = await storage.getFlashcardCategories();
+      response.json({ categories });
+    })
+  );
+
+  app.get(
+    "/api/flashcards/:categoryId",
+    asyncHandler(async (request: Request, response: Response) => {
+      const set = await storage.getFlashcardsByCategory(request.params.categoryId);
+
+      if (!set) {
+        return sendNotFound(response, "Flashcard category not found.");
+      }
+
+      response.json(set);
+    })
+  );
+
+  app.get(
     "/api/problems/:id",
     asyncHandler(async (request: Request, response: Response) => {
       const problem = await storage.getProblemById(request.params.id);
@@ -122,6 +143,80 @@ export function createServer(storage: StorageProvider): express.Express {
         name: user.name,
         createdAt: user.createdAt,
         attempts: user.attempts,
+        flashcardStars: user.flashcardStars,
+      });
+    })
+  );
+
+  app.get(
+    "/api/users/:userId/flashcards/:categoryId",
+    asyncHandler(async (request: Request, response: Response) => {
+      const user = await storage.getUser(request.params.userId);
+
+      if (!user) {
+        return sendNotFound(response, "User not found.");
+      }
+
+      const categoryId = request.params.categoryId;
+      const set = await storage.getFlashcardsByCategory(categoryId);
+
+      if (!set) {
+        return sendNotFound(response, "Flashcard category not found.");
+      }
+
+      response.json({
+        categoryId,
+        starredIds: user.flashcardStars[categoryId] ?? [],
+      });
+    })
+  );
+
+  app.post(
+    "/api/users/:userId/flashcards/:categoryId/star",
+    asyncHandler(async (request: Request, response: Response) => {
+      const { cardId, starred } = request.body ?? {};
+
+      if (typeof cardId !== "string" || !cardId.trim()) {
+        return sendBadRequest(response, "A cardId is required.");
+      }
+
+      if (typeof starred !== "boolean") {
+        return sendBadRequest(response, "Starred must be a boolean.");
+      }
+
+      const user = await storage.getUser(request.params.userId);
+
+      if (!user) {
+        return sendNotFound(response, "User not found.");
+      }
+
+      const categoryId = request.params.categoryId;
+      const set = await storage.getFlashcardsByCategory(categoryId);
+
+      if (!set) {
+        return sendNotFound(response, "Flashcard category not found.");
+      }
+
+      const cardExists = set.cards.some((card) => card.id === cardId);
+
+      if (!cardExists) {
+        return sendBadRequest(response, "Flashcard not found in this category.");
+      }
+
+      const existing = new Set(user.flashcardStars[categoryId] ?? []);
+
+      if (starred) {
+        existing.add(cardId);
+      } else {
+        existing.delete(cardId);
+      }
+
+      user.flashcardStars[categoryId] = Array.from(existing);
+      await storage.saveUser(user);
+
+      response.json({
+        categoryId,
+        starredIds: user.flashcardStars[categoryId],
       });
     })
   );
@@ -207,6 +302,7 @@ export function createServer(storage: StorageProvider): express.Express {
         name: user.name,
         createdAt: user.createdAt,
         attempts: user.attempts,
+        flashcardStars: user.flashcardStars,
       });
     })
   );

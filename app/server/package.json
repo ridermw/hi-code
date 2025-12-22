@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "ts-node src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "generate:flashcards": "node ../../scripts/generate-flashcards.js",
     "start": "node dist/index.js",
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit"

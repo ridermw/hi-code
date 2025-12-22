@@ -17,6 +17,9 @@ export function Layout({ children }: { children: React.ReactNode }): JSX.Element
           <Link to="/problems" className={path.startsWith("/problems") ? "active" : ""}>
             Problems
           </Link>
+          <Link to="/flashcards" className={path.startsWith("/flashcards") ? "active" : ""}>
+            Flashcards
+          </Link>
         </nav>
         <div className="header-actions">
           <ThemeToggle />

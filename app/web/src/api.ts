@@ -1,6 +1,8 @@
 import {
   AttemptEvaluation,
   AttemptSelections,
+  FlashcardCategory,
+  FlashcardSet,
   ProblemDetail,
   ProblemSummary,
   UserProfile,
@@ -55,6 +57,49 @@ export async function fetchProblems(): Promise<ProblemSummary[]> {
   return data.problems;
 }
 
+export async function fetchFlashcardCategories(): Promise<FlashcardCategory[]> {
+  const response = await fetch(`${API_BASE}/flashcards`);
+  const data = await handleJsonResponse<{ categories: FlashcardCategory[] }>(response);
+  return data.categories;
+}
+
+export async function fetchFlashcards(categoryId: string): Promise<FlashcardSet> {
+  const response = await fetch(`${API_BASE}/flashcards/${encodeURIComponent(categoryId)}`);
+  return handleJsonResponse<FlashcardSet>(response);
+}
+
+export async function fetchFlashcardStars(
+  userId: string,
+  categoryId: string
+): Promise<string[]> {
+  const response = await fetch(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}`
+  );
+  const data = await handleJsonResponse<{ starredIds: string[] }>(response);
+  return data.starredIds;
+}
+
+export async function updateFlashcardStar(
+  userId: string,
+  categoryId: string,
+  cardId: string,
+  starred: boolean
+): Promise<string[]> {
+  const response = await fetch(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}/star`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cardId, starred }),
+    }
+  );
+
+  const data = await handleJsonResponse<{ starredIds: string[] }>(response);
+  return data.starredIds;
+}
+
 export async function fetchProblem(problemId: string): Promise<ProblemDetail> {
   const response = await fetch(`${API_BASE}/problems/${encodeURIComponent(problemId)}`);
   return handleJsonResponse<ProblemDetail>(response);
@@ -81,7 +126,13 @@ export async function resetUserProgress(userId: string): Promise<UserProfile> {
     method: "POST",
   });
 
-  const data = await handleJsonResponse<{ attempts: UserProfile["attempts"]; id: string; name: string; createdAt: string }>(
+  const data = await handleJsonResponse<{
+    attempts: UserProfile["attempts"];
+    id: string;
+    name: string;
+    createdAt: string;
+    flashcardStars: UserProfile["flashcardStars"];
+  }>(
     response
   );
 
@@ -90,5 +141,6 @@ export async function resetUserProgress(userId: string): Promise<UserProfile> {
     name: data.name,
     createdAt: data.createdAt,
     attempts: data.attempts,
+    flashcardStars: data.flashcardStars,
   };
 }

@@ -1,0 +1,11 @@
+{
+  "categories": [
+    {
+      "id": "two_pointers",
+      "name": "Two Pointers",
+      "description": "Core pointer patterns for arrays and linked lists.",
+      "path": "flashcards/two_pointers.json",
+      "cardCount": 5
+    }
+  ]
+}
