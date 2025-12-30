@@ -28,7 +28,6 @@ export function LoginPage(): JSX.Element {
 
     try {
       await authenticate(name.trim());
-      navigate("/problems");
     } catch (submitError: any) {
       setError(submitError?.message ?? "Could not create user.");
     } finally {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import { Router, RouteSwitch, useNavigation } from "./router";
 import { Layout } from "./components/Layout";
@@ -13,14 +13,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }): JSX.Elemen
   const { user, loading } = useUser();
   const { path, navigate } = useNavigation();
 
+  const shouldRedirect = !loading && !user && path !== "/login";
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      navigate("/login");
+    }
+  }, [navigate, shouldRedirect]);
+
   if (loading) {
     return <p className="muted">Loading profile...</p>;
   }
 
   if (!user) {
-    if (path !== "/login") {
-      navigate("/login");
-    }
     return <LoginPage />;
   }
 

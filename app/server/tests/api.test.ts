@@ -190,7 +190,15 @@ describe("API endpoints", () => {
     await once(res, "finish");
 
     const text = Buffer.concat(chunks).toString("utf8");
-    const parsed = text ? JSON.parse(text) : null;
+    let parsed: any = null;
+
+    if (text) {
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        parsed = text;
+      }
+    }
 
     return { status: res.statusCode, body: parsed };
   }
@@ -238,6 +246,28 @@ describe("API endpoints", () => {
     expect(cardsResponse.body.cards).toHaveLength(2);
   });
 
+  it("returns errors for invalid flashcard requests", async () => {
+    const unknownCategory = await sendRequest({
+      method: "GET",
+      path: "/api/flashcards/missing",
+    });
+    expect(unknownCategory.status).toBe(404);
+
+    const user = await storage.createUser("Nova");
+
+    const missingUser = await sendRequest({
+      method: "GET",
+      path: "/api/users/missing/flashcards/two_pointers",
+    });
+    expect(missingUser.status).toBe(404);
+
+    const missingCategory = await sendRequest({
+      method: "GET",
+      path: `/api/users/${user.id}/flashcards/missing`,
+    });
+    expect(missingCategory.status).toBe(404);
+  });
+
   it("stores flashcard stars for a user", async () => {
     const user = await storage.createUser("Zoe");
 
@@ -256,6 +286,31 @@ describe("API endpoints", () => {
     });
     expect(unstarResponse.status).toBe(200);
     expect(unstarResponse.body.starredIds).not.toContain("two-pointers-core");
+  });
+
+  it("validates flashcard star payloads", async () => {
+    const user = await storage.createUser("Rex");
+
+    const missingCard = await sendRequest({
+      method: "POST",
+      path: `/api/users/${user.id}/flashcards/two_pointers/star`,
+      body: { starred: true },
+    });
+    expect(missingCard.status).toBe(400);
+
+    const invalidStarred = await sendRequest({
+      method: "POST",
+      path: `/api/users/${user.id}/flashcards/two_pointers/star`,
+      body: { cardId: "two-pointers-core", starred: "yes" },
+    });
+    expect(invalidStarred.status).toBe(400);
+
+    const invalidCard = await sendRequest({
+      method: "POST",
+      path: `/api/users/${user.id}/flashcards/two_pointers/star`,
+      body: { cardId: "missing-card", starred: true },
+    });
+    expect(invalidCard.status).toBe(400);
   });
 
   it("loads and guards user progress", async () => {
@@ -290,6 +345,28 @@ describe("API endpoints", () => {
       body: { problemId: "missing", selections: null },
     });
     expect(missingProblem.status).toBe(404);
+
+    const missingSelections = await sendRequest({
+      method: "POST",
+      path: `/api/users/${user.id}/attempts`,
+      body: { problemId: "two_sum", selections: null },
+    });
+    expect(missingSelections.status).toBe(400);
+
+    const incompleteSelections = await sendRequest({
+      method: "POST",
+      path: `/api/users/${user.id}/attempts`,
+      body: {
+        problemId: "two_sum",
+        selections: {
+          algorithms: "",
+          implementations: "impl-1",
+          timeComplexities: "time-1",
+          spaceComplexities: "space-1",
+        },
+      },
+    });
+    expect(incompleteSelections.status).toBe(400);
 
     const invalidSelections = {
       algorithms: "alg-3",

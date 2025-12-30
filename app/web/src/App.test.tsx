@@ -3,6 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import App from "./App";
 
+type Deferred<T> = {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: unknown) => void;
+};
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve: (value: T) => void = () => undefined;
+  let reject: (error: unknown) => void = () => undefined;
+
+  const promise = new Promise<T>((innerResolve, innerReject) => {
+    resolve = innerResolve;
+    reject = innerReject;
+  });
+
+  return { promise, resolve, reject };
+}
+
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -52,25 +70,20 @@ function buildProblemDetail() {
 describe("App", () => {
   beforeEach(() => {
     localStorage.clear();
+    window.history.pushState({}, "", "/login");
+    vi.restoreAllMocks();
   });
 
   it("creates a user and loads the problems list", async () => {
+    const userDeferred = createDeferred<Response>();
+    const problemsDeferred = createDeferred<Response>();
     const fetchMock = setupFetch((url, init) => {
       if (url.endsWith("/api/users") && init?.method === "POST") {
-        return jsonResponse({ id: "user-1", name: "Ada", createdAt: new Date().toISOString(), attempts: {} }, 201);
+        return userDeferred.promise;
       }
 
       if (url.endsWith("/api/problems")) {
-        return jsonResponse({
-          problems: [
-            {
-              id: "two_sum",
-              title: "Two Sum",
-              category: "Arrays",
-              difficulty: "Easy",
-            },
-          ],
-        });
+        return problemsDeferred.promise;
       }
 
       throw new Error(`Unhandled request for ${url}`);
@@ -78,12 +91,57 @@ describe("App", () => {
 
     const user = userEvent.setup();
     render(<App />);
+    await screen.findByRole("button", { name: /continue/i });
 
     await user.type(screen.getByLabelText(/username/i), "Ada");
     await user.click(screen.getByRole("button", { name: /continue/i }));
 
-    await screen.findByText(/Problems/);
-    await screen.findByText(/Two Sum/);
+    let userResolved = false;
+    await waitFor(async () => {
+      const hasUserRequest = fetchMock.mock.calls.some(
+        (call) => call[0].toString().includes("/api/users") && call[1]?.method === "POST"
+      );
+
+      if (hasUserRequest && !userResolved) {
+        userResolved = true;
+        userDeferred.resolve(
+          jsonResponse(
+            { id: "user-1", name: "Ada", createdAt: new Date().toISOString(), attempts: {}, flashcardStars: {} },
+            201
+          )
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasUserRequest).toBe(true);
+    });
+
+    let problemsResolved = false;
+    await waitFor(async () => {
+      const hasProblemsRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes("/api/problems")
+      );
+
+      if (hasProblemsRequest && !problemsResolved) {
+        problemsResolved = true;
+        problemsDeferred.resolve(
+          jsonResponse({
+            problems: [
+              {
+                id: "two_sum",
+                title: "Two Sum",
+                category: "Arrays",
+                difficulty: "Easy",
+              },
+            ],
+          })
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasProblemsRequest).toBe(true);
+      expect(screen.getByText(/Two Sum/)).toBeInTheDocument();
+    });
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/api/users"),
@@ -94,48 +152,30 @@ describe("App", () => {
 
   it("walks through an attempt flow and reset", async () => {
     const problem = buildProblemDetail();
+    const userDeferred = createDeferred<Response>();
+    const problemsDeferred = createDeferred<Response>();
+    const problemDeferred = createDeferred<Response>();
+    const attemptDeferred = createDeferred<Response>();
+    const resetDeferred = createDeferred<Response>();
     const fetchMock = setupFetch((url, init) => {
       if (url.endsWith("/api/users") && init?.method === "POST") {
-        return jsonResponse({ id: "user-2", name: "Neo", createdAt: new Date().toISOString(), attempts: {} }, 201);
+        return userDeferred.promise;
       }
 
       if (url.endsWith("/api/problems")) {
-        return jsonResponse({ problems: [{ id: problem.id, title: problem.title, category: problem.category, difficulty: problem.difficulty }] });
+        return problemsDeferred.promise;
       }
 
       if (url.endsWith(`/api/problems/${problem.id}`)) {
-        return jsonResponse(problem);
+        return problemDeferred.promise;
       }
 
       if (url.includes(`/api/users/user-2/attempts`)) {
-        return jsonResponse({
-          attempt: {
-            timestamp: new Date().toISOString(),
-            selections: {
-              algorithms: "alg-1",
-              implementations: "impl-1",
-              timeComplexities: "time-1",
-              spaceComplexities: "space-1",
-            },
-            correctness: {
-              algorithms: true,
-              implementations: true,
-              timeComplexities: true,
-              spaceComplexities: true,
-            },
-          },
-          overallCorrect: true,
-        }, 201);
+        return attemptDeferred.promise;
       }
 
       if (url.includes(`/api/users/user-2/reset`)) {
-        return jsonResponse({
-          message: "Progress reset for user.",
-          id: "user-2",
-          name: "Neo",
-          createdAt: new Date().toISOString(),
-          attempts: {},
-        });
+        return resetDeferred.promise;
       }
 
       throw new Error(`Unhandled request for ${url}`);
@@ -144,32 +184,155 @@ describe("App", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const user = userEvent.setup();
     render(<App />);
+    await screen.findByRole("button", { name: /continue/i });
 
     await user.type(screen.getByLabelText(/username/i), "Neo");
     await user.click(screen.getByRole("button", { name: /continue/i }));
 
+    let userResolved = false;
+    await waitFor(async () => {
+      const hasUserRequest = fetchMock.mock.calls.some(
+        (call) => call[0].toString().includes("/api/users") && call[1]?.method === "POST"
+      );
+
+      if (hasUserRequest && !userResolved) {
+        userResolved = true;
+        userDeferred.resolve(
+          jsonResponse(
+            { id: "user-2", name: "Neo", createdAt: new Date().toISOString(), attempts: {}, flashcardStars: {} },
+            201
+          )
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasUserRequest).toBe(true);
+    });
+
+    let problemsResolved = false;
+    await waitFor(async () => {
+      const hasProblemsRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes("/api/problems")
+      );
+
+      if (hasProblemsRequest && !problemsResolved) {
+        problemsResolved = true;
+        problemsDeferred.resolve(
+          jsonResponse({
+            problems: [
+              {
+                id: problem.id,
+                title: problem.title,
+                category: problem.category,
+                difficulty: problem.difficulty,
+              },
+            ],
+          })
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasProblemsRequest).toBe(true);
+      expect(screen.getByRole("heading", { name: /Problems/i })).toBeInTheDocument();
+    });
+
     await user.click(await screen.findByText(/Open details/i));
-    await screen.findByText(problem.title);
+    let problemResolved = false;
+    await waitFor(async () => {
+      const hasProblemRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes(`/api/problems/${problem.id}`)
+      );
+
+      if (hasProblemRequest && !problemResolved) {
+        problemResolved = true;
+        problemDeferred.resolve(jsonResponse(problem));
+        await Promise.resolve();
+      }
+
+      expect(hasProblemRequest).toBe(true);
+      expect(screen.getByText(problem.title)).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button", { name: /Submit answers/i }));
-    expect(await screen.findByText(/Please choose an option/)).toBeInTheDocument();
+    await screen.findByText(/Please choose an option/);
 
-    await user.click(screen.getByRole("button", { name: problem.sections.algorithms[0].label }));
-    await user.click(screen.getByRole("button", { name: problem.sections.implementations[0].label }));
-    await user.click(screen.getByRole("button", { name: problem.sections.timeComplexities[0].label }));
-    await user.click(screen.getByRole("button", { name: problem.sections.spaceComplexities[0].label }));
+    await user.click(await screen.findByRole("radio", { name: problem.sections.algorithms[0].label }));
+    await user.click(await screen.findByRole("radio", { name: problem.sections.implementations[0].label }));
+    await user.click(await screen.findByRole("radio", { name: problem.sections.timeComplexities[0].label }));
+    await user.click(await screen.findByRole("radio", { name: problem.sections.spaceComplexities[0].label }));
 
     await user.click(screen.getByRole("button", { name: /Submit answers/i }));
-    await screen.findByText(/Great job!/i);
-    await screen.findByText(/Attempt 1/);
+    let attemptResolved = false;
+    await waitFor(async () => {
+      const hasAttemptRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes(`/api/users/user-2/attempts`)
+      );
+
+      if (hasAttemptRequest && !attemptResolved) {
+        attemptResolved = true;
+        attemptDeferred.resolve(
+          jsonResponse(
+            {
+              attempt: {
+                timestamp: new Date().toISOString(),
+                selections: {
+                  algorithms: "alg-1",
+                  implementations: "impl-1",
+                  timeComplexities: "time-1",
+                  spaceComplexities: "space-1",
+                },
+                correctness: {
+                  algorithms: true,
+                  implementations: true,
+                  timeComplexities: true,
+                  spaceComplexities: true,
+                },
+              },
+              overallCorrect: true,
+            },
+            201
+          )
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasAttemptRequest).toBe(true);
+      expect(screen.getByText(/Great job!/i)).toBeInTheDocument();
+      expect(screen.getByText(/Attempt 1/)).toBeInTheDocument();
+    });
 
     await user.click(screen.getByRole("button", { name: /Reset all history/i }));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/reset"), expect.anything()));
+    let resetResolved = false;
+    await waitFor(async () => {
+      const hasResetRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes(`/api/users/user-2/reset`)
+      );
+
+      if (hasResetRequest && !resetResolved) {
+        resetResolved = true;
+        resetDeferred.resolve(
+          jsonResponse({
+            message: "Progress reset for user.",
+            id: "user-2",
+            name: "Neo",
+            createdAt: new Date().toISOString(),
+            attempts: {},
+            flashcardStars: {},
+          })
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasResetRequest).toBe(true);
+    });
+
     await screen.findByText(/You have not submitted any attempts yet./i);
   });
 
   it("restores a saved user and progress from storage", async () => {
     const problem = buildProblemDetail();
+    const userDeferred = createDeferred<Response>();
+    const problemsDeferred = createDeferred<Response>();
     const storedUser = {
       id: "user-3",
       name: "Trinity",
@@ -193,34 +356,64 @@ describe("App", () => {
           },
         ],
       },
+      flashcardStars: {},
     };
 
     localStorage.setItem("hi-code:userId", storedUser.id);
 
-    setupFetch((url) => {
+    const fetchMock = setupFetch((url) => {
       if (url.includes(`/api/users/${storedUser.id}/progress`)) {
-        return jsonResponse(storedUser);
+        return userDeferred.promise;
       }
 
       if (url.endsWith("/api/problems")) {
-        return jsonResponse({
-          problems: [
-            {
-              id: problem.id,
-              title: problem.title,
-              category: problem.category,
-              difficulty: problem.difficulty,
-            },
-          ],
-        });
+        return problemsDeferred.promise;
       }
 
       throw new Error(`Unhandled request for ${url}`);
     });
 
     render(<App />);
+    let userResolved = false;
+    await waitFor(async () => {
+      const hasUserRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes(`/api/users/${storedUser.id}/progress`)
+      );
 
-    await screen.findByText(/Problems/);
-    await screen.findByText(/Two Sum/);
+      if (hasUserRequest && !userResolved) {
+        userResolved = true;
+        userDeferred.resolve(jsonResponse(storedUser));
+        await Promise.resolve();
+      }
+
+      expect(hasUserRequest).toBe(true);
+    });
+
+    let problemsResolved = false;
+    await waitFor(async () => {
+      const hasProblemsRequest = fetchMock.mock.calls.some((call) =>
+        call[0].toString().includes("/api/problems")
+      );
+
+      if (hasProblemsRequest && !problemsResolved) {
+        problemsResolved = true;
+        problemsDeferred.resolve(
+          jsonResponse({
+            problems: [
+              {
+                id: problem.id,
+                title: problem.title,
+                category: problem.category,
+                difficulty: problem.difficulty,
+              },
+            ],
+          })
+        );
+        await Promise.resolve();
+      }
+
+      expect(hasProblemsRequest).toBe(true);
+      expect(screen.getByText(/Two Sum/)).toBeInTheDocument();
+    });
   });
 });
