@@ -40,3 +40,4 @@
 # Notes for agents
 - Prefer updating `app/` code; markdown in `Problems/` is source data, not runtime.
 - Trust these instructions; only search the repo if info is missing or incorrect.
+- For parallel local clones, override ports to avoid conflicts (default `web:5173`, `server:3000`).

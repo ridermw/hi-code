@@ -8,3 +8,4 @@ server/data/users
 web/dist
 web/coverage
 **/*.js.map
+**/*.md
