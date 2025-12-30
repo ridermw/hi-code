@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchFlashcardCategories,
   fetchFlashcards,
@@ -24,6 +24,7 @@ export function FlashcardsPage(): JSX.Element {
   const [showStarredOnly, setShowStarredOnly] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
     let isActive = true;
@@ -60,6 +61,9 @@ export function FlashcardsPage(): JSX.Element {
       return;
     }
 
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
     setLoading(true);
     setError(null);
 
@@ -68,14 +72,22 @@ export function FlashcardsPage(): JSX.Element {
       user ? fetchFlashcardStars(user.id, selectedCategory) : Promise.resolve([]),
     ])
       .then(([set, stars]) => {
+        if (requestIdRef.current !== requestId) {
+          return;
+        }
         setCards(set.cards);
         setStarredIds(stars);
       })
       .catch((loadError: any) => {
+        if (requestIdRef.current !== requestId) {
+          return;
+        }
         setError(loadError?.message ?? "Could not load flashcards.");
       })
       .finally(() => {
-        setLoading(false);
+        if (requestIdRef.current === requestId) {
+          setLoading(false);
+        }
       });
   }, [selectedCategory, user]);
 
@@ -91,9 +103,16 @@ export function FlashcardsPage(): JSX.Element {
 
   const currentCard = filteredCards[currentIndex];
   const totalCards = filteredCards.length;
-  const starredCount = starredIds.length;
-  const mastery = totalCards
-    ? Math.max(0, Math.round(((totalCards - starredCount) / totalCards) * 100))
+  const totalCategoryCards = cards.length;
+  const starredCount = useMemo(
+    () => cards.filter((card) => starredSet.has(card.id)).length,
+    [cards, starredSet]
+  );
+  const mastery = totalCategoryCards
+    ? Math.max(
+        0,
+        Math.round(((totalCategoryCards - starredCount) / totalCategoryCards) * 100)
+      )
     : 0;
 
   useEffect(() => {

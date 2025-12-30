@@ -115,6 +115,7 @@ async function handleJsonResponse<T>(
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const method = init?.method ?? "GET";
   const startTime = performance.now();
+  let response: Response | null = null;
 
   log("info", `[api] ${method} ${url}`);
 
@@ -126,11 +127,13 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   }
 
   try {
-    const response = await fetch(url, init);
+    response = await fetch(url, init);
     return await handleJsonResponse<T>(response, { method, url, startTime });
   } catch (error) {
-    const duration = Math.round(performance.now() - startTime);
-    log("error", `[api] ${method} ${url} -> network error (${duration}ms)`, error);
+    if (!response) {
+      const duration = Math.round(performance.now() - startTime);
+      log("error", `[api] ${method} ${url} -> network error (${duration}ms)`, error);
+    }
     throw error;
   }
 }
