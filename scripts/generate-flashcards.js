@@ -20,7 +20,11 @@ function extractSection(markdown, heading) {
     const line = lines[i];
     const trimmed = line.trim();
 
-    if (trimmed.startsWith("### ") || trimmed.startsWith("## ") || trimmed.startsWith("# ")) {
+    if (
+      trimmed.startsWith("### ") ||
+      trimmed.startsWith("## ") ||
+      trimmed.startsWith("# ")
+    ) {
       break;
     }
 
@@ -56,7 +60,10 @@ function extractPatternDefinitions(section) {
   for (const line of lines) {
     const match = line.trim().match(/^\d+\.\s+\*\*(.+?)\*\*\s+-\s+(.*)$/);
     if (match) {
-      patterns.push({ term: match[1].trim(), description: cleanMarkdown(match[2]) });
+      patterns.push({
+        term: match[1].trim(),
+        description: cleanMarkdown(match[2]),
+      });
     }
   }
 
@@ -92,14 +99,17 @@ function parsePatternSteps(codeBlock) {
 
 function findPatternSteps(stepMap, term) {
   const entry = Object.entries(stepMap).find(([key]) =>
-    key.toLowerCase().startsWith(term.toLowerCase())
+    key.toLowerCase().startsWith(term.toLowerCase()),
   );
 
   return entry ? entry[1] : [];
 }
 
 function extractExampleLines(section) {
-  const lines = section.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const lines = section
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
   const examples = [];
 
   for (const line of lines) {
@@ -110,7 +120,9 @@ function extractExampleLines(section) {
       examples.push(cleanMarkdown(line.replace("**Why Two Pointers?**", "")));
     }
     if (line.startsWith("**Without Two Pointers:**")) {
-      examples.push(cleanMarkdown(line.replace("**Without Two Pointers:**", "")));
+      examples.push(
+        cleanMarkdown(line.replace("**Without Two Pointers:**", "")),
+      );
     }
     if (line.startsWith("**With Two Pointers:**")) {
       examples.push(cleanMarkdown(line.replace("**With Two Pointers:**", "")));
@@ -141,15 +153,22 @@ async function generateFlashcardsFromMarkdown(config) {
   const markdown = await fs.readFile(markdownPath, "utf-8");
 
   const definitionSection = extractSection(markdown, "What is Two Pointers?");
-  const typesSection = extractSection(markdown, "Types of Two Pointer Patterns:");
+  const typesSection = extractSection(
+    markdown,
+    "Types of Two Pointer Patterns:",
+  );
   const whenSection = extractSection(markdown, "When to Use Two Pointers?");
   const genericPatternsSection = extractSection(markdown, "Generic Patterns:");
   const exampleSection = extractSection(markdown, "Example:");
 
-  const definition = cleanMarkdown(definitionSection.split(/\n\n/)[0] ?? definitionSection);
+  const definition = cleanMarkdown(
+    definitionSection.split(/\n\n/)[0] ?? definitionSection,
+  );
   const whenToUse = extractListItems(whenSection);
   const patternDefinitions = extractPatternDefinitions(typesSection);
-  const genericPatternSteps = parsePatternSteps(extractCodeBlock(genericPatternsSection));
+  const genericPatternSteps = parsePatternSteps(
+    extractCodeBlock(genericPatternsSection),
+  );
   const simpleExamples = extractExampleLines(exampleSection);
 
   const categoryId = config.id;
@@ -167,7 +186,7 @@ async function generateFlashcardsFromMarkdown(config) {
       definition,
       whenToUse,
       genericPatterns: patternDefinitions.map(
-        (pattern) => `${pattern.term}: ${pattern.description}`
+        (pattern) => `${pattern.term}: ${pattern.description}`,
       ),
       simpleExamples,
       algorithmPrompt:

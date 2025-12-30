@@ -7,11 +7,16 @@
     "dev:verbose": "concurrently \"npm run dev:verbose --prefix server\" \"npm run dev:verbose --prefix web\"",
     "build": "npm run build --prefix web && npm run build --prefix server",
     "start": "npm run start --prefix server",
+    "format": "prettier --write \"./*.{json,md}\" \"{server,web}/**/*.{ts,tsx,js,jsx,json,md,css,html}\" \"../scripts/**/*.{ts,tsx,js,jsx,json,md,css,html}\"",
+    "format:check": "prettier --check \"./*.{json,md}\" \"{server,web}/**/*.{ts,tsx,js,jsx,json,md,css,html}\" \"../scripts/**/*.{ts,tsx,js,jsx,json,md,css,html}\"",
     "test": "npm test --prefix server && npm test --prefix web",
     "lint": "npm run lint --prefix server && npm run lint --prefix web",
+    "lint:watch": "concurrently \"npm run lint:watch --prefix server\" \"npm run lint:watch --prefix web\"",
+    "precommit": "npm run format:check && npm run lint && npm run test && npm run build",
     "install:all": "npm install --prefix packages/domain && npm install --prefix server && npm install --prefix web"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prettier": "^3.7.4"
   }
 }

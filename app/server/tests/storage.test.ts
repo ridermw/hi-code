@@ -26,7 +26,7 @@ describe("FileStorageProvider", () => {
             throw error;
           }
         }
-      })
+      }),
     );
     createdUserIds.length = 0;
   });
@@ -70,7 +70,9 @@ describe("FileStorageProvider", () => {
 
     const refreshed = await storage.getUser(user.id);
     expect(refreshed?.attempts.sample).toEqual([]);
-    expect(refreshed?.flashcardStars.two_pointers).toEqual(["two-pointers-core"]);
+    expect(refreshed?.flashcardStars.two_pointers).toEqual([
+      "two-pointers-core",
+    ]);
   });
 
   it("returns null when a user is missing", async () => {

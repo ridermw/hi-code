@@ -109,7 +109,9 @@ async function renderFlashcardsPage(): Promise<void> {
       starsDeferred.resolve(["two-pointers-core"]);
       await Promise.resolve();
     }
-    expect(screen.getByRole("heading", { name: "Two Pointers" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Two Pointers" }),
+    ).toBeInTheDocument();
   });
 }
 
@@ -120,7 +122,9 @@ describe("FlashcardsPage", () => {
     starsDeferred = createDeferred();
     updateStarDeferred = null;
 
-    apiMocks.fetchFlashcardCategories.mockReturnValue(categoriesDeferred.promise);
+    apiMocks.fetchFlashcardCategories.mockReturnValue(
+      categoriesDeferred.promise,
+    );
     apiMocks.fetchFlashcards.mockReturnValue(flashcardsDeferred.promise);
     apiMocks.fetchFlashcardStars.mockReturnValue(starsDeferred.promise);
     apiMocks.updateFlashcardStar.mockImplementation(() => {
@@ -136,7 +140,9 @@ describe("FlashcardsPage", () => {
     expect(screen.getByText(/Card 1 of 2/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /Flip card/i }));
-    expect(await screen.findByText(/Use two indices to traverse data structures/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Use two indices to traverse data structures/),
+    ).toBeInTheDocument();
     expect(screen.getByText(/When to use/)).toBeInTheDocument();
     expect(screen.getByText(/Algorithm prompt/)).toBeInTheDocument();
   });
@@ -146,7 +152,9 @@ describe("FlashcardsPage", () => {
     await renderFlashcardsPage();
 
     await user.click(screen.getByRole("button", { name: /Definition first/i }));
-    expect(screen.getByText(/Use two indices to traverse data structures/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Use two indices to traverse data structures/),
+    ).toBeInTheDocument();
 
     const starButtons = screen.getAllByRole("button", { name: /Starred/i });
     await user.click(starButtons[0]);
@@ -161,13 +169,15 @@ describe("FlashcardsPage", () => {
         "user-1",
         "two_pointers",
         "two-pointers-core",
-        false
+        false,
       );
       expect(screen.getAllByRole("button", { name: "Star" })).toHaveLength(2);
     });
 
     await user.click(screen.getByLabelText(/Study starred only/i));
-    expect(await screen.findByText(/No flashcards match this filter yet/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/No flashcards match this filter yet/),
+    ).toBeInTheDocument();
   });
 
   it("moves to the next card", async () => {

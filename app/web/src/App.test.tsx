@@ -28,11 +28,15 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function setupFetch(responder: (url: string, init?: RequestInit) => Response | Promise<Response>) {
-  const mockFetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = typeof input === "string" ? input : input.toString();
-    return responder(url, init);
-  });
+function setupFetch(
+  responder: (url: string, init?: RequestInit) => Response | Promise<Response>,
+) {
+  const mockFetch = vi.fn(
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      return responder(url, init);
+    },
+  );
 
   globalThis.fetch = mockFetch as unknown as typeof fetch;
   return mockFetch;
@@ -48,7 +52,11 @@ function buildProblemDetail() {
     difficulty: "Easy",
     sections: {
       algorithms: [
-        { id: "alg-1", label: "Traverse the array once while storing complements in a hash map." },
+        {
+          id: "alg-1",
+          label:
+            "Traverse the array once while storing complements in a hash map.",
+        },
         { id: "alg-2", label: "Check every pair with a double nested loop." },
       ],
       implementations: [
@@ -61,7 +69,10 @@ function buildProblemDetail() {
       ],
       spaceComplexities: [
         { id: "space-1", label: "O(n) space for the hash map of seen values." },
-        { id: "space-2", label: "O(1) extra space by scanning the array in-place." },
+        {
+          id: "space-2",
+          label: "O(1) extra space by scanning the array in-place.",
+        },
       ],
     },
   };
@@ -99,16 +110,24 @@ describe("App", () => {
     let userResolved = false;
     await waitFor(async () => {
       const hasUserRequest = fetchMock.mock.calls.some(
-        (call) => call[0].toString().includes("/api/users") && call[1]?.method === "POST"
+        (call) =>
+          call[0].toString().includes("/api/users") &&
+          call[1]?.method === "POST",
       );
 
       if (hasUserRequest && !userResolved) {
         userResolved = true;
         userDeferred.resolve(
           jsonResponse(
-            { id: "user-1", name: "Ada", createdAt: new Date().toISOString(), attempts: {}, flashcardStars: {} },
-            201
-          )
+            {
+              id: "user-1",
+              name: "Ada",
+              createdAt: new Date().toISOString(),
+              attempts: {},
+              flashcardStars: {},
+            },
+            201,
+          ),
         );
         await Promise.resolve();
       }
@@ -119,7 +138,7 @@ describe("App", () => {
     let problemsResolved = false;
     await waitFor(async () => {
       const hasProblemsRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes("/api/problems")
+        call[0].toString().includes("/api/problems"),
       );
 
       if (hasProblemsRequest && !problemsResolved) {
@@ -134,7 +153,7 @@ describe("App", () => {
                 difficulty: "Easy",
               },
             ],
-          })
+          }),
         );
         await Promise.resolve();
       }
@@ -145,9 +164,12 @@ describe("App", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("/api/users"),
-      expect.objectContaining({ method: "POST" })
+      expect.objectContaining({ method: "POST" }),
     );
-    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/api/problems"), undefined);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/api/problems"),
+      undefined,
+    );
   });
 
   it("walks through an attempt flow and reset", async () => {
@@ -192,16 +214,24 @@ describe("App", () => {
     let userResolved = false;
     await waitFor(async () => {
       const hasUserRequest = fetchMock.mock.calls.some(
-        (call) => call[0].toString().includes("/api/users") && call[1]?.method === "POST"
+        (call) =>
+          call[0].toString().includes("/api/users") &&
+          call[1]?.method === "POST",
       );
 
       if (hasUserRequest && !userResolved) {
         userResolved = true;
         userDeferred.resolve(
           jsonResponse(
-            { id: "user-2", name: "Neo", createdAt: new Date().toISOString(), attempts: {}, flashcardStars: {} },
-            201
-          )
+            {
+              id: "user-2",
+              name: "Neo",
+              createdAt: new Date().toISOString(),
+              attempts: {},
+              flashcardStars: {},
+            },
+            201,
+          ),
         );
         await Promise.resolve();
       }
@@ -212,7 +242,7 @@ describe("App", () => {
     let problemsResolved = false;
     await waitFor(async () => {
       const hasProblemsRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes("/api/problems")
+        call[0].toString().includes("/api/problems"),
       );
 
       if (hasProblemsRequest && !problemsResolved) {
@@ -227,20 +257,22 @@ describe("App", () => {
                 difficulty: problem.difficulty,
               },
             ],
-          })
+          }),
         );
         await Promise.resolve();
       }
 
       expect(hasProblemsRequest).toBe(true);
-      expect(screen.getByRole("heading", { name: /Problems/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /Problems/i }),
+      ).toBeInTheDocument();
     });
 
     await user.click(await screen.findByText(/Open details/i));
     let problemResolved = false;
     await waitFor(async () => {
       const hasProblemRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes(`/api/problems/${problem.id}`)
+        call[0].toString().includes(`/api/problems/${problem.id}`),
       );
 
       if (hasProblemRequest && !problemResolved) {
@@ -256,16 +288,32 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: /Submit answers/i }));
     await screen.findByText(/Please choose an option/);
 
-    await user.click(await screen.findByRole("radio", { name: problem.sections.algorithms[0].label }));
-    await user.click(await screen.findByRole("radio", { name: problem.sections.implementations[0].label }));
-    await user.click(await screen.findByRole("radio", { name: problem.sections.timeComplexities[0].label }));
-    await user.click(await screen.findByRole("radio", { name: problem.sections.spaceComplexities[0].label }));
+    await user.click(
+      await screen.findByRole("radio", {
+        name: problem.sections.algorithms[0].label,
+      }),
+    );
+    await user.click(
+      await screen.findByRole("radio", {
+        name: problem.sections.implementations[0].label,
+      }),
+    );
+    await user.click(
+      await screen.findByRole("radio", {
+        name: problem.sections.timeComplexities[0].label,
+      }),
+    );
+    await user.click(
+      await screen.findByRole("radio", {
+        name: problem.sections.spaceComplexities[0].label,
+      }),
+    );
 
     await user.click(screen.getByRole("button", { name: /Submit answers/i }));
     let attemptResolved = false;
     await waitFor(async () => {
       const hasAttemptRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes(`/api/users/user-2/attempts`)
+        call[0].toString().includes(`/api/users/user-2/attempts`),
       );
 
       if (hasAttemptRequest && !attemptResolved) {
@@ -290,8 +338,8 @@ describe("App", () => {
               },
               overallCorrect: true,
             },
-            201
-          )
+            201,
+          ),
         );
         await Promise.resolve();
       }
@@ -301,11 +349,13 @@ describe("App", () => {
       expect(screen.getByText(/Attempt 1/)).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("button", { name: /Reset all history/i }));
+    await user.click(
+      screen.getByRole("button", { name: /Reset all history/i }),
+    );
     let resetResolved = false;
     await waitFor(async () => {
       const hasResetRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes(`/api/users/user-2/reset`)
+        call[0].toString().includes(`/api/users/user-2/reset`),
       );
 
       if (hasResetRequest && !resetResolved) {
@@ -318,7 +368,7 @@ describe("App", () => {
             createdAt: new Date().toISOString(),
             attempts: {},
             flashcardStars: {},
-          })
+          }),
         );
         await Promise.resolve();
       }
@@ -377,7 +427,7 @@ describe("App", () => {
     let userResolved = false;
     await waitFor(async () => {
       const hasUserRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes(`/api/users/${storedUser.id}/progress`)
+        call[0].toString().includes(`/api/users/${storedUser.id}/progress`),
       );
 
       if (hasUserRequest && !userResolved) {
@@ -392,7 +442,7 @@ describe("App", () => {
     let problemsResolved = false;
     await waitFor(async () => {
       const hasProblemsRequest = fetchMock.mock.calls.some((call) =>
-        call[0].toString().includes("/api/problems")
+        call[0].toString().includes("/api/problems"),
       );
 
       if (hasProblemsRequest && !problemsResolved) {
@@ -407,7 +457,7 @@ describe("App", () => {
                 difficulty: problem.difficulty,
               },
             ],
-          })
+          }),
         );
         await Promise.resolve();
       }

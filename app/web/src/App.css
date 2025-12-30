@@ -158,7 +158,9 @@
 .quiz-card {
   border-width: 2px;
   border-color: var(--border-subtle);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .quiz-card.is-correct {
@@ -185,7 +187,10 @@
   padding: 0.75rem 0.85rem;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.1s ease;
 }
 
 .option-button:hover {

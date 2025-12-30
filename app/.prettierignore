@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+server/dist
+server/coverage
+server/tests/**/*.js
+server/data/users
+web/dist
+web/coverage
+**/*.js.map

@@ -122,9 +122,7 @@
         "Problems involving symmetry or opposite ends",
         "Need to partition or rearrange in-place"
       ],
-      "genericPatterns": [
-        "Expand and contract window based on conditions"
-      ],
+      "genericPatterns": ["Expand and contract window based on conditions"],
       "simpleExamples": [
         "Find two numbers in sorted array that sum to target",
         "With one pointer at start (small values) and one at end (large values), we can make greedy decisions. If sum too small, move left pointer (increase sum). If sum too large, move right pointer (decrease sum). This exploits the sorted property.",

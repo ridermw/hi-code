@@ -96,7 +96,9 @@ class InMemoryStorageProvider implements StorageProvider {
     return [this.flashcards.category];
   }
 
-  async getFlashcardsByCategory(categoryId: string): Promise<FlashcardSet | null> {
+  async getFlashcardsByCategory(
+    categoryId: string,
+  ): Promise<FlashcardSet | null> {
     if (categoryId !== this.flashcards.category.id) {
       return null;
     }
@@ -204,39 +206,64 @@ describe("API endpoints", () => {
   }
 
   it("lists problems and omits answer keys", async () => {
-    const listResponse = await sendRequest({ method: "GET", path: "/api/problems" });
+    const listResponse = await sendRequest({
+      method: "GET",
+      path: "/api/problems",
+    });
     const listBody = listResponse.body;
     expect(listResponse.status).toBe(200);
     expect(listBody.problems).toHaveLength(1);
-    expect(listBody.problems[0]).toMatchObject({ id: "two_sum", title: "Two Sum" });
+    expect(listBody.problems[0]).toMatchObject({
+      id: "two_sum",
+      title: "Two Sum",
+    });
 
-    const detailResponse = await sendRequest({ method: "GET", path: "/api/problems/two_sum" });
+    const detailResponse = await sendRequest({
+      method: "GET",
+      path: "/api/problems/two_sum",
+    });
     const detailBody = detailResponse.body;
     expect(detailBody.title).toBe("Two Sum");
     expect(detailBody.answerKey).toBeUndefined();
   });
 
   it("returns 404 for unknown problems", async () => {
-    const response = await sendRequest({ method: "GET", path: "/api/problems/unknown" });
+    const response = await sendRequest({
+      method: "GET",
+      path: "/api/problems/unknown",
+    });
     const body = response.body;
     expect(response.status).toBe(404);
     expect(body.error).toMatch(/Problem not found/);
   });
 
   it("creates users and enforces validation", async () => {
-    const invalid = await sendRequest({ method: "POST", path: "/api/users", body: { name: "" } });
+    const invalid = await sendRequest({
+      method: "POST",
+      path: "/api/users",
+      body: { name: "" },
+    });
     expect(invalid.status).toBe(400);
 
-    const response = await sendRequest({ method: "POST", path: "/api/users", body: { name: "Ada" } });
+    const response = await sendRequest({
+      method: "POST",
+      path: "/api/users",
+      body: { name: "Ada" },
+    });
     const body = response.body;
     expect(response.status).toBe(201);
     expect(body).toMatchObject({ name: "Ada" });
   });
 
   it("lists flashcard categories and cards", async () => {
-    const categoriesResponse = await sendRequest({ method: "GET", path: "/api/flashcards" });
+    const categoriesResponse = await sendRequest({
+      method: "GET",
+      path: "/api/flashcards",
+    });
     expect(categoriesResponse.status).toBe(200);
-    expect(categoriesResponse.body.categories[0]).toMatchObject({ id: "two_pointers" });
+    expect(categoriesResponse.body.categories[0]).toMatchObject({
+      id: "two_pointers",
+    });
 
     const cardsResponse = await sendRequest({
       method: "GET",
@@ -314,7 +341,10 @@ describe("API endpoints", () => {
   });
 
   it("loads and guards user progress", async () => {
-    const missing = await sendRequest({ method: "GET", path: "/api/users/missing/progress" });
+    const missing = await sendRequest({
+      method: "GET",
+      path: "/api/users/missing/progress",
+    });
     const missingBody = missing.body;
     expect(missing.status).toBe(404);
     expect(missingBody.error).toMatch(/User not found/);
@@ -323,7 +353,10 @@ describe("API endpoints", () => {
     user.attempts = { two_sum: [] };
     await storage.saveUser(user);
 
-    const response = await sendRequest({ method: "GET", path: `/api/users/${user.id}/progress` });
+    const response = await sendRequest({
+      method: "GET",
+      path: `/api/users/${user.id}/progress`,
+    });
     const body = response.body;
     expect(response.status).toBe(200);
     expect(body).toMatchObject({ id: user.id, name: "Grace" });
@@ -415,7 +448,10 @@ describe("API endpoints", () => {
   });
 
   it("resets attempts for a user", async () => {
-    const missingReset = await sendRequest({ method: "POST", path: "/api/users/ghost/reset" });
+    const missingReset = await sendRequest({
+      method: "POST",
+      path: "/api/users/ghost/reset",
+    });
     const missingBody = missingReset.body;
     expect(missingReset.status).toBe(404);
     expect(missingBody.error).toMatch(/User not found/);
@@ -442,7 +478,10 @@ describe("API endpoints", () => {
     };
     await storage.saveUser(user);
 
-    const resetResponse = await sendRequest({ method: "POST", path: `/api/users/${user.id}/reset` });
+    const resetResponse = await sendRequest({
+      method: "POST",
+      path: `/api/users/${user.id}/reset`,
+    });
     const resetBody = resetResponse.body;
     expect(resetResponse.status).toBe(200);
     expect(resetBody.attempts).toEqual({});

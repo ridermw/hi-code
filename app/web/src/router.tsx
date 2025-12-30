@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface RouterContextValue {
   path: string;
@@ -17,7 +23,11 @@ export function useNavigation(): RouterContextValue {
   return context;
 }
 
-export function Router({ children }: { children: React.ReactNode }): JSX.Element {
+export function Router({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
   const [path, setPath] = useState(() => window.location.pathname || "/");
 
   useEffect(() => {
@@ -40,7 +50,9 @@ export function Router({ children }: { children: React.ReactNode }): JSX.Element
 
   const value = useMemo(() => ({ path, navigate }), [path]);
 
-  return <RouterContext.Provider value={value}>{children}</RouterContext.Provider>;
+  return (
+    <RouterContext.Provider value={value}>{children}</RouterContext.Provider>
+  );
 }
 
 export interface RouteDefinition {
@@ -54,7 +66,10 @@ export function useRouteParams(): Record<string, string> {
   return useContext(RouteParamsContext);
 }
 
-function matchPath(pattern: string, target: string): Record<string, string> | null {
+function matchPath(
+  pattern: string,
+  target: string,
+): Record<string, string> | null {
   if (pattern === "*") {
     return {};
   }
@@ -98,7 +113,11 @@ export function RouteSwitch({
     const params = matchPath(route.path, path);
 
     if (params) {
-      return <RouteParamsContext.Provider value={params}>{route.element}</RouteParamsContext.Provider>;
+      return (
+        <RouteParamsContext.Provider value={params}>
+          {route.element}
+        </RouteParamsContext.Provider>
+      );
     }
   }
 

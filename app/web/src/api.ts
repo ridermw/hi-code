@@ -41,10 +41,10 @@ function log(level: LogLevel, message: string, meta?: unknown): void {
     level === "error"
       ? console.error
       : level === "warn"
-      ? console.warn
-      : level === "debug" || level === "trace"
-      ? console.debug
-      : console.info;
+        ? console.warn
+        : level === "debug" || level === "trace"
+          ? console.debug
+          : console.info;
 
   if (meta !== undefined) {
     logger(message, meta);
@@ -77,7 +77,7 @@ function formatLogValue(value: unknown): unknown {
 
 async function handleJsonResponse<T>(
   response: Response,
-  context?: { method: string; url: string; startTime: number }
+  context?: { method: string; url: string; startTime: number },
 ): Promise<T> {
   const text = await response.text();
   let data: unknown = null;
@@ -102,9 +102,12 @@ async function handleJsonResponse<T>(
     const errorMessage =
       typeof data === "string"
         ? data
-        : data && typeof data === "object" && "error" in data && typeof (data as { error?: unknown }).error === "string"
-        ? (data as { error: string }).error
-        : "Request failed";
+        : data &&
+            typeof data === "object" &&
+            "error" in data &&
+            typeof (data as { error?: unknown }).error === "string"
+          ? (data as { error: string }).error
+          : "Request failed";
 
     throw new Error(errorMessage);
   }
@@ -132,7 +135,11 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   } catch (error) {
     if (!response) {
       const duration = Math.round(performance.now() - startTime);
-      log("error", `[api] ${method} ${url} -> network error (${duration}ms)`, error);
+      log(
+        "error",
+        `[api] ${method} ${url} -> network error (${duration}ms)`,
+        error,
+      );
     }
     throw error;
   }
@@ -150,30 +157,38 @@ export async function createUser(name: string): Promise<UserProfile> {
 
 export async function fetchUser(userId: string): Promise<UserProfile> {
   return requestJson<UserProfile>(
-    `${API_BASE}/users/${encodeURIComponent(userId)}/progress`
+    `${API_BASE}/users/${encodeURIComponent(userId)}/progress`,
   );
 }
 
 export async function fetchProblems(): Promise<ProblemSummary[]> {
-  const data = await requestJson<{ problems: ProblemSummary[] }>(`${API_BASE}/problems`);
+  const data = await requestJson<{ problems: ProblemSummary[] }>(
+    `${API_BASE}/problems`,
+  );
   return data.problems;
 }
 
 export async function fetchFlashcardCategories(): Promise<FlashcardCategory[]> {
-  const data = await requestJson<{ categories: FlashcardCategory[] }>(`${API_BASE}/flashcards`);
+  const data = await requestJson<{ categories: FlashcardCategory[] }>(
+    `${API_BASE}/flashcards`,
+  );
   return data.categories;
 }
 
-export async function fetchFlashcards(categoryId: string): Promise<FlashcardSet> {
-  return requestJson<FlashcardSet>(`${API_BASE}/flashcards/${encodeURIComponent(categoryId)}`);
+export async function fetchFlashcards(
+  categoryId: string,
+): Promise<FlashcardSet> {
+  return requestJson<FlashcardSet>(
+    `${API_BASE}/flashcards/${encodeURIComponent(categoryId)}`,
+  );
 }
 
 export async function fetchFlashcardStars(
   userId: string,
-  categoryId: string
+  categoryId: string,
 ): Promise<string[]> {
   const data = await requestJson<{ starredIds: string[] }>(
-    `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}`
+    `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}`,
   );
   return data.starredIds;
 }
@@ -182,7 +197,7 @@ export async function updateFlashcardStar(
   userId: string,
   categoryId: string,
   cardId: string,
-  starred: boolean
+  starred: boolean,
 ): Promise<string[]> {
   const data = await requestJson<{ starredIds: string[] }>(
     `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}/star`,
@@ -192,27 +207,32 @@ export async function updateFlashcardStar(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ cardId, starred }),
-    }
+    },
   );
   return data.starredIds;
 }
 
 export async function fetchProblem(problemId: string): Promise<ProblemDetail> {
-  return requestJson<ProblemDetail>(`${API_BASE}/problems/${encodeURIComponent(problemId)}`);
+  return requestJson<ProblemDetail>(
+    `${API_BASE}/problems/${encodeURIComponent(problemId)}`,
+  );
 }
 
 export async function submitAttempt(
   userId: string,
   problemId: string,
-  selections: AttemptSelections
+  selections: AttemptSelections,
 ): Promise<AttemptEvaluation> {
-  return requestJson<AttemptEvaluation>(`${API_BASE}/users/${encodeURIComponent(userId)}/attempts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  return requestJson<AttemptEvaluation>(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/attempts`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ problemId, selections }),
     },
-    body: JSON.stringify({ problemId, selections }),
-  });
+  );
 }
 
 export async function resetUserProgress(userId: string): Promise<UserProfile> {

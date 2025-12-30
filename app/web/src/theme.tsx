@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type Theme = "light" | "dark";
 
@@ -14,7 +20,11 @@ function applyDocumentTheme(theme: Theme): void {
   document.documentElement.setAttribute("data-theme", theme);
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }): JSX.Element {
+export function ThemeProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
     return stored ?? "light";
@@ -31,7 +41,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): JSX.
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme]);
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme(): ThemeContextValue {

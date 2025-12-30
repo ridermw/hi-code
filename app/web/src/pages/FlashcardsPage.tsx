@@ -69,7 +69,9 @@ export function FlashcardsPage(): JSX.Element {
 
     Promise.all([
       fetchFlashcards(selectedCategory),
-      user ? fetchFlashcardStars(user.id, selectedCategory) : Promise.resolve([]),
+      user
+        ? fetchFlashcardStars(user.id, selectedCategory)
+        : Promise.resolve([]),
     ])
       .then(([set, stars]) => {
         if (requestIdRef.current !== requestId) {
@@ -106,12 +108,14 @@ export function FlashcardsPage(): JSX.Element {
   const totalCategoryCards = cards.length;
   const starredCount = useMemo(
     () => cards.filter((card) => starredSet.has(card.id)).length,
-    [cards, starredSet]
+    [cards, starredSet],
   );
   const mastery = totalCategoryCards
     ? Math.max(
         0,
-        Math.round(((totalCategoryCards - starredCount) / totalCategoryCards) * 100)
+        Math.round(
+          ((totalCategoryCards - starredCount) / totalCategoryCards) * 100,
+        ),
       )
     : 0;
 
@@ -138,7 +142,7 @@ export function FlashcardsPage(): JSX.Element {
         user.id,
         selectedCategory,
         currentCard.id,
-        nextStarred
+        nextStarred,
       );
       setStarredIds(updated);
     } catch (updateError: any) {
@@ -170,7 +174,9 @@ export function FlashcardsPage(): JSX.Element {
         <div>
           <p className="eyebrow">Memory game</p>
           <h1>Flashcards</h1>
-          <p className="muted">Practice concepts, patterns, and algorithm selection cues.</p>
+          <p className="muted">
+            Practice concepts, patterns, and algorithm selection cues.
+          </p>
         </div>
         <div className="flashcards-controls">
           <label className="flashcards-select">
@@ -196,7 +202,9 @@ export function FlashcardsPage(): JSX.Element {
             </button>
             <button
               type="button"
-              className={studyMode === "definition" ? "toggle is-active" : "toggle"}
+              className={
+                studyMode === "definition" ? "toggle is-active" : "toggle"
+              }
               onClick={() => setStudyMode("definition")}
             >
               Definition first
@@ -231,7 +239,9 @@ export function FlashcardsPage(): JSX.Element {
               <div className="flashcard-inner">
                 <div className="flashcard-face flashcard-front">
                   <div className="flashcard-top">
-                    <span className="pill">{currentCard.category.replace(/_/g, " ")}</span>
+                    <span className="pill">
+                      {currentCard.category.replace(/_/g, " ")}
+                    </span>
                     <button
                       type="button"
                       className={
@@ -244,11 +254,15 @@ export function FlashcardsPage(): JSX.Element {
                       {starredSet.has(currentCard.id) ? "Starred" : "Star"}
                     </button>
                   </div>
-                  <p className="eyebrow">{studyMode === "term" ? "Term" : "Definition"}</p>
+                  <p className="eyebrow">
+                    {studyMode === "term" ? "Term" : "Definition"}
+                  </p>
                   {studyMode === "term" ? (
                     <h2>{currentCard.term}</h2>
                   ) : (
-                    <p className="flashcard-definition">{currentCard.definition}</p>
+                    <p className="flashcard-definition">
+                      {currentCard.definition}
+                    </p>
                   )}
                   <button
                     type="button"
@@ -260,7 +274,9 @@ export function FlashcardsPage(): JSX.Element {
                 </div>
                 <div className="flashcard-face flashcard-back">
                   <div className="flashcard-top">
-                    <span className="pill">{currentCard.category.replace(/_/g, " ")}</span>
+                    <span className="pill">
+                      {currentCard.category.replace(/_/g, " ")}
+                    </span>
                     <button
                       type="button"
                       className={
@@ -273,9 +289,13 @@ export function FlashcardsPage(): JSX.Element {
                       {starredSet.has(currentCard.id) ? "Starred" : "Star"}
                     </button>
                   </div>
-                  <p className="eyebrow">{studyMode === "term" ? "Definition" : "Term"}</p>
+                  <p className="eyebrow">
+                    {studyMode === "term" ? "Definition" : "Term"}
+                  </p>
                   {studyMode === "term" ? (
-                    <p className="flashcard-definition">{currentCard.definition}</p>
+                    <p className="flashcard-definition">
+                      {currentCard.definition}
+                    </p>
                   ) : (
                     <h2>{currentCard.term}</h2>
                   )}
@@ -336,7 +356,12 @@ export function FlashcardsPage(): JSX.Element {
             >
               Previous
             </button>
-            <button type="button" className="primary" onClick={handleNext} disabled={!totalCards}>
+            <button
+              type="button"
+              className="primary"
+              onClick={handleNext}
+              disabled={!totalCards}
+            >
               Next
             </button>
           </div>

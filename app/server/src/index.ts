@@ -31,7 +31,7 @@ function normalizeLogLevel(value: string | undefined): LogLevel {
 }
 
 const CURRENT_LOG_LEVEL = normalizeLogLevel(
-  process.env.HI_CODE_LOG_LEVEL ?? process.env.LOG_LEVEL
+  process.env.HI_CODE_LOG_LEVEL ?? process.env.LOG_LEVEL,
 );
 
 function shouldLog(level: LogLevel): boolean {
@@ -47,10 +47,10 @@ function log(level: LogLevel, message: string, meta?: unknown): void {
     level === "error"
       ? console.error
       : level === "warn"
-      ? console.warn
-      : level === "debug" || level === "trace"
-      ? console.debug
-      : console.info;
+        ? console.warn
+        : level === "debug" || level === "trace"
+          ? console.debug
+          : console.info;
 
   if (meta !== undefined) {
     logger(message, meta);
@@ -92,7 +92,7 @@ function sendNotFound(response: Response, message: string): void {
 type AsyncHandler = (
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => Promise<void>;
 
 function asyncHandler(handler: AsyncHandler) {
@@ -103,9 +103,13 @@ function asyncHandler(handler: AsyncHandler) {
 
 function validateSelections(
   problem: Problem,
-  selections: AttemptSelections | undefined | null
+  selections: AttemptSelections | undefined | null,
 ): string | null {
-  if (selections === null || selections === undefined || typeof selections !== "object") {
+  if (
+    selections === null ||
+    selections === undefined ||
+    typeof selections !== "object"
+  ) {
     return "Selections for each section are required.";
   }
 
@@ -156,7 +160,7 @@ export function createServer(storage: StorageProvider): express.Express {
       const duration = Date.now() - start;
       log(
         "info",
-        `[api] ${request.method} ${request.originalUrl} -> ${response.statusCode} (${duration}ms)`
+        `[api] ${request.method} ${request.originalUrl} -> ${response.statusCode} (${duration}ms)`,
       );
     });
 
@@ -168,7 +172,7 @@ export function createServer(storage: StorageProvider): express.Express {
     asyncHandler(async (_request: Request, response: Response) => {
       const problems = await storage.getProblems();
       response.json({ problems });
-    })
+    }),
   );
 
   app.get(
@@ -176,20 +180,22 @@ export function createServer(storage: StorageProvider): express.Express {
     asyncHandler(async (_request: Request, response: Response) => {
       const categories = await storage.getFlashcardCategories();
       response.json({ categories });
-    })
+    }),
   );
 
   app.get(
     "/api/flashcards/:categoryId",
     asyncHandler(async (request: Request, response: Response) => {
-      const set = await storage.getFlashcardsByCategory(request.params.categoryId);
+      const set = await storage.getFlashcardsByCategory(
+        request.params.categoryId,
+      );
 
       if (!set) {
         return sendNotFound(response, "Flashcard category not found.");
       }
 
       response.json(set);
-    })
+    }),
   );
 
   app.get(
@@ -203,7 +209,7 @@ export function createServer(storage: StorageProvider): express.Express {
 
       const { answerKey, ...problemWithoutAnswer } = problem;
       response.json(problemWithoutAnswer);
-    })
+    }),
   );
 
   app.post(
@@ -217,7 +223,7 @@ export function createServer(storage: StorageProvider): express.Express {
 
       const user = await storage.createUser(name.trim());
       response.status(201).json(user);
-    })
+    }),
   );
 
   app.get(
@@ -236,7 +242,7 @@ export function createServer(storage: StorageProvider): express.Express {
         attempts: user.attempts,
         flashcardStars: user.flashcardStars,
       });
-    })
+    }),
   );
 
   app.get(
@@ -259,7 +265,7 @@ export function createServer(storage: StorageProvider): express.Express {
         categoryId,
         starredIds: user.flashcardStars[categoryId] ?? [],
       });
-    })
+    }),
   );
 
   app.post(
@@ -291,7 +297,10 @@ export function createServer(storage: StorageProvider): express.Express {
       const cardExists = set.cards.some((card) => card.id === cardId);
 
       if (!cardExists) {
-        return sendBadRequest(response, "Flashcard not found in this category.");
+        return sendBadRequest(
+          response,
+          "Flashcard not found in this category.",
+        );
       }
 
       const existing = new Set(user.flashcardStars[categoryId] ?? []);
@@ -309,7 +318,7 @@ export function createServer(storage: StorageProvider): express.Express {
         categoryId,
         starredIds: user.flashcardStars[categoryId],
       });
-    })
+    }),
   );
 
   app.post(
@@ -354,7 +363,7 @@ export function createServer(storage: StorageProvider): express.Express {
           implementations: false,
           timeComplexities: false,
           spaceComplexities: false,
-        }
+        },
       );
 
       const attempt: Attempt = {
@@ -372,7 +381,7 @@ export function createServer(storage: StorageProvider): express.Express {
         attempt,
         overallCorrect: Object.values(correctness).every((value) => value),
       });
-    })
+    }),
   );
 
   app.post(
@@ -395,35 +404,47 @@ export function createServer(storage: StorageProvider): express.Express {
         attempts: user.attempts,
         flashcardStars: user.flashcardStars,
       });
-    })
+    }),
   );
 
   app.use(express.static(webDistDir));
 
-  app.get("*", async (request: Request, response: Response, next: NextFunction) => {
-    if (request.path.startsWith("/api")) {
-      return next();
-    }
-
-    if (!hasWebIndex) {
-      return next();
-    }
-
-    response.sendFile(webIndexFile, (error) => {
-      if (error) {
-        next(error);
+  app.get(
+    "*",
+    async (request: Request, response: Response, next: NextFunction) => {
+      if (request.path.startsWith("/api")) {
+        return next();
       }
-    });
-  });
 
-  app.use((error: Error, request: Request, response: Response, _next: NextFunction) => {
-    log(
-      "error",
-      `[${new Date().toISOString()}] ${request.method} ${request.url}:`,
-      error
-    );
-    response.status(500).json({ error: "Internal server error. Please try again later." });
-  });
+      if (!hasWebIndex) {
+        return next();
+      }
+
+      response.sendFile(webIndexFile, (error) => {
+        if (error) {
+          next(error);
+        }
+      });
+    },
+  );
+
+  app.use(
+    (
+      error: Error,
+      request: Request,
+      response: Response,
+      _next: NextFunction,
+    ) => {
+      log(
+        "error",
+        `[${new Date().toISOString()}] ${request.method} ${request.url}:`,
+        error,
+      );
+      response
+        .status(500)
+        .json({ error: "Internal server error. Please try again later." });
+    },
+  );
 
   return app;
 }

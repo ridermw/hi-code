@@ -10,7 +10,7 @@ vi.mock("react-dom/client", () => ({
 
 describe("main entry", () => {
   it("renders the app when a root element exists", async () => {
-    document.body.innerHTML = "<div id=\"root\"></div>";
+    document.body.innerHTML = '<div id="root"></div>';
     vi.resetModules();
 
     await import("./main");

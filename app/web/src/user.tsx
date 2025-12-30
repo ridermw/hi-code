@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { createUser, fetchUser, resetUserProgress } from "./api";
 import { Attempt, UserProfile } from "./types";
 
@@ -15,7 +22,11 @@ interface UserContextValue {
 const STORAGE_KEY = "hi-code:userId";
 const UserContext = createContext<UserContextValue | null>(null);
 
-export function UserProvider({ children }: { children: React.ReactNode }): JSX.Element {
+export function UserProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -96,7 +107,15 @@ export function UserProvider({ children }: { children: React.ReactNode }): JSX.E
       resetProgress,
       refreshProfile,
     }),
-    [user, loading, authenticate, clearUser, recordAttempt, resetProgress, refreshProfile]
+    [
+      user,
+      loading,
+      authenticate,
+      clearUser,
+      recordAttempt,
+      resetProgress,
+      refreshProfile,
+    ],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

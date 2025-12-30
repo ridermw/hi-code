@@ -9,7 +9,11 @@ import { ProblemDetailPage } from "./pages/ProblemDetailPage";
 import { ThemeProvider } from "./theme";
 import { UserProvider, useUser } from "./user";
 
-function ProtectedRoute({ children }: { children: React.ReactNode }): JSX.Element {
+function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
   const { user, loading } = useUser();
   const { path, navigate } = useNavigation();
 
@@ -38,10 +42,38 @@ function AppShell(): JSX.Element {
       <RouteSwitch
         routes={[
           { path: "/login", element: <LoginPage /> },
-          { path: "/problems", element: <ProtectedRoute><ProblemsPage /></ProtectedRoute> },
-          { path: "/problems/:id", element: <ProtectedRoute><ProblemDetailPage /></ProtectedRoute> },
-          { path: "/flashcards", element: <ProtectedRoute><FlashcardsPage /></ProtectedRoute> },
-          { path: "/", element: <ProtectedRoute><ProblemsPage /></ProtectedRoute> },
+          {
+            path: "/problems",
+            element: (
+              <ProtectedRoute>
+                <ProblemsPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/problems/:id",
+            element: (
+              <ProtectedRoute>
+                <ProblemDetailPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/flashcards",
+            element: (
+              <ProtectedRoute>
+                <FlashcardsPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/",
+            element: (
+              <ProtectedRoute>
+                <ProblemsPage />
+              </ProtectedRoute>
+            ),
+          },
         ]}
         fallback={<LoginPage />}
       />

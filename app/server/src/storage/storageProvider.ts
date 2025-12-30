@@ -1,4 +1,10 @@
-import { FlashcardCategory, FlashcardSet, Problem, ProblemSummary, User } from "../types";
+import {
+  FlashcardCategory,
+  FlashcardSet,
+  Problem,
+  ProblemSummary,
+  User,
+} from "../types";
 
 export interface StorageProvider {
   getProblems(): Promise<ProblemSummary[]>;

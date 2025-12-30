@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run --coverage",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "lint:watch": "tsc -p tsconfig.json --noEmit --watch"
   },
   "dependencies": {
     "react": "^18.2.0",

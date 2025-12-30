@@ -1,7 +1,14 @@
 import fs from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
-import { Flashcard, FlashcardCategory, FlashcardSet, Problem, ProblemSummary, User } from "../types";
+import {
+  Flashcard,
+  FlashcardCategory,
+  FlashcardSet,
+  Problem,
+  ProblemSummary,
+  User,
+} from "../types";
 import { StorageProvider } from "./storageProvider";
 
 interface ProblemIndexEntry extends ProblemSummary {
@@ -37,7 +44,11 @@ export class FileStorageProvider implements StorageProvider {
   private readonly dataDir = path.resolve(__dirname, "..", "..", "data");
   private readonly usersDir = path.join(this.dataDir, "users");
   private readonly problemsIndexPath = path.join(this.dataDir, "problems.json");
-  private readonly flashcardsIndexPath = path.join(this.dataDir, "flashcards", "index.json");
+  private readonly flashcardsIndexPath = path.join(
+    this.dataDir,
+    "flashcards",
+    "index.json",
+  );
 
   private async readJson<T>(filePath: string): Promise<T> {
     const contents = await fs.readFile(filePath, "utf-8");
@@ -88,9 +99,13 @@ export class FileStorageProvider implements StorageProvider {
     }));
   }
 
-  async getFlashcardsByCategory(categoryId: string): Promise<FlashcardSet | null> {
+  async getFlashcardsByCategory(
+    categoryId: string,
+  ): Promise<FlashcardSet | null> {
     const index = await this.loadFlashcardsIndex();
-    const entry = index.categories.find((category) => category.id === categoryId);
+    const entry = index.categories.find(
+      (category) => category.id === categoryId,
+    );
 
     if (!entry) {
       return null;
