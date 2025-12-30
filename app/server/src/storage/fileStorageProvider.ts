@@ -41,7 +41,7 @@ interface FlashcardsFile {
 }
 
 export class FileStorageProvider implements StorageProvider {
-  private readonly dataDir = path.resolve(__dirname, "..", "..", "data");
+  private readonly dataDir = resolveDataDir();
   private readonly usersDir = path.join(this.dataDir, "users");
   private readonly problemsIndexPath = path.join(this.dataDir, "problems.json");
   private readonly flashcardsIndexPath = path.join(
@@ -163,4 +163,13 @@ export class FileStorageProvider implements StorageProvider {
     const userPath = path.join(this.usersDir, `${user.id}.json`);
     await fs.writeFile(userPath, JSON.stringify(user, null, 2), "utf-8");
   }
+}
+
+function resolveDataDir(): string {
+  const distSegment = `${path.sep}dist${path.sep}`;
+  const baseDir = __dirname.includes(distSegment)
+    ? path.resolve(__dirname, "..", "..", "..")
+    : path.resolve(__dirname, "..", "..");
+
+  return path.join(baseDir, "data");
 }

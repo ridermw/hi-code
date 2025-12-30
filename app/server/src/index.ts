@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import express, { NextFunction, Request, Response } from "express";
+import { createLogger, normalizeLogLevel } from "@hi-code/logging";
 import { FileStorageProvider } from "./storage/fileStorageProvider";
 import { StorageProvider } from "./storage/storageProvider";
 import { Attempt, AttemptSelections, Problem, ProblemSection } from "./types";
@@ -14,72 +15,9 @@ const REQUIRED_SECTIONS: ProblemSection[] = [
   "spaceComplexities",
 ];
 
-type LogLevel = "silent" | "error" | "warn" | "info" | "debug" | "trace";
-
-const LOG_LEVELS: Record<LogLevel, number> = {
-  silent: 0,
-  error: 1,
-  warn: 2,
-  info: 3,
-  debug: 4,
-  trace: 5,
-};
-
-function normalizeLogLevel(value: string | undefined): LogLevel {
-  const normalized = (value ?? "info").toLowerCase() as LogLevel;
-  return normalized in LOG_LEVELS ? normalized : "info";
-}
-
-const CURRENT_LOG_LEVEL = normalizeLogLevel(
-  process.env.HI_CODE_LOG_LEVEL ?? process.env.LOG_LEVEL,
+const { log, shouldLog, formatLogValue } = createLogger(
+  normalizeLogLevel(process.env.HI_CODE_LOG_LEVEL ?? process.env.LOG_LEVEL),
 );
-
-function shouldLog(level: LogLevel): boolean {
-  return LOG_LEVELS[level] <= LOG_LEVELS[CURRENT_LOG_LEVEL];
-}
-
-function log(level: LogLevel, message: string, meta?: unknown): void {
-  if (!shouldLog(level)) {
-    return;
-  }
-
-  const logger =
-    level === "error"
-      ? console.error
-      : level === "warn"
-        ? console.warn
-        : level === "debug" || level === "trace"
-          ? console.debug
-          : console.info;
-
-  if (meta !== undefined) {
-    logger(message, meta);
-    return;
-  }
-
-  logger(message);
-}
-
-function formatLogValue(value: unknown): unknown {
-  if (value === undefined || value === null) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    return value.length > 500 ? `${value.slice(0, 500)}...` : value;
-  }
-
-  if (typeof value === "object") {
-    try {
-      const serialized = JSON.stringify(value);
-      return serialized.length > 500 ? `${serialized.slice(0, 500)}...` : value;
-    } catch {
-      return value;
-    }
-  }
-
-  return value;
-}
 
 function sendBadRequest(response: Response, message: string): void {
   response.status(400).json({ error: message });

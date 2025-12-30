@@ -13,6 +13,7 @@
     "lint:watch": "tsc -p tsconfig.json --noEmit --watch"
   },
   "dependencies": {
+    "@hi-code/logging": "file:../packages/logging",
     "express": "^4.19.2"
   },
   "devDependencies": {

@@ -13,7 +13,7 @@ function ProtectedRoute({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element {
+}): JSX.Element | null {
   const { user, loading } = useUser();
   const { path, navigate } = useNavigation();
 
@@ -30,7 +30,7 @@ function ProtectedRoute({
   }
 
   if (!user) {
-    return <LoginPage />;
+    return null;
   }
 
   return <>{children}</>;

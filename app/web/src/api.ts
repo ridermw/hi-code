@@ -1,3 +1,4 @@
+import { createLogger, normalizeLogLevel } from "@hi-code/logging";
 import {
   AttemptEvaluation,
   AttemptSelections,
@@ -10,70 +11,9 @@ import {
 
 const API_BASE = "/api";
 
-type LogLevel = "silent" | "error" | "warn" | "info" | "debug" | "trace";
-
-const LOG_LEVELS: Record<LogLevel, number> = {
-  silent: 0,
-  error: 1,
-  warn: 2,
-  info: 3,
-  debug: 4,
-  trace: 5,
-};
-
-function normalizeLogLevel(value: string | undefined): LogLevel {
-  const normalized = (value ?? "info").toLowerCase() as LogLevel;
-  return normalized in LOG_LEVELS ? normalized : "info";
-}
-
-const CURRENT_LOG_LEVEL = normalizeLogLevel(import.meta.env.VITE_LOG_LEVEL);
-
-function shouldLog(level: LogLevel): boolean {
-  return LOG_LEVELS[level] <= LOG_LEVELS[CURRENT_LOG_LEVEL];
-}
-
-function log(level: LogLevel, message: string, meta?: unknown): void {
-  if (!shouldLog(level)) {
-    return;
-  }
-
-  const logger =
-    level === "error"
-      ? console.error
-      : level === "warn"
-        ? console.warn
-        : level === "debug" || level === "trace"
-          ? console.debug
-          : console.info;
-
-  if (meta !== undefined) {
-    logger(message, meta);
-    return;
-  }
-
-  logger(message);
-}
-
-function formatLogValue(value: unknown): unknown {
-  if (value === undefined || value === null) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    return value.length > 500 ? `${value.slice(0, 500)}...` : value;
-  }
-
-  if (typeof value === "object") {
-    try {
-      const serialized = JSON.stringify(value);
-      return serialized.length > 500 ? `${serialized.slice(0, 500)}...` : value;
-    } catch {
-      return value;
-    }
-  }
-
-  return value;
-}
+const { log, shouldLog, formatLogValue } = createLogger(
+  normalizeLogLevel(import.meta.env.VITE_LOG_LEVEL),
+);
 
 async function handleJsonResponse<T>(
   response: Response,
