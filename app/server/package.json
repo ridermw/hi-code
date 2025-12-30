@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "HI_CODE_LOG_LEVEL=info ts-node src/index.ts",
+    "dev:verbose": "HI_CODE_LOG_LEVEL=trace ts-node src/index.ts",
     "build": "tsc -p tsconfig.json",
     "generate:flashcards": "node ../../scripts/generate-flashcards.js",
     "start": "node dist/index.js",

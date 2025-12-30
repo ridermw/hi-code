@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "VITE_LOG_LEVEL=info vite",
+    "dev:verbose": "VITE_LOG_LEVEL=trace vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

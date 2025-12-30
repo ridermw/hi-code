@@ -123,7 +123,7 @@ export function FlashcardsPage(): JSX.Element {
       );
       setStarredIds(updated);
     } catch (updateError: any) {
-      setError(updateError?.message ?? \"Could not update flashcard.\");
+      setError(updateError?.message ?? "Could not update flashcard.");
     }
   };
 

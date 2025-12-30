@@ -14,6 +14,73 @@ const REQUIRED_SECTIONS: ProblemSection[] = [
   "spaceComplexities",
 ];
 
+type LogLevel = "silent" | "error" | "warn" | "info" | "debug" | "trace";
+
+const LOG_LEVELS: Record<LogLevel, number> = {
+  silent: 0,
+  error: 1,
+  warn: 2,
+  info: 3,
+  debug: 4,
+  trace: 5,
+};
+
+function normalizeLogLevel(value: string | undefined): LogLevel {
+  const normalized = (value ?? "info").toLowerCase() as LogLevel;
+  return normalized in LOG_LEVELS ? normalized : "info";
+}
+
+const CURRENT_LOG_LEVEL = normalizeLogLevel(
+  process.env.HI_CODE_LOG_LEVEL ?? process.env.LOG_LEVEL
+);
+
+function shouldLog(level: LogLevel): boolean {
+  return LOG_LEVELS[level] <= LOG_LEVELS[CURRENT_LOG_LEVEL];
+}
+
+function log(level: LogLevel, message: string, meta?: unknown): void {
+  if (!shouldLog(level)) {
+    return;
+  }
+
+  const logger =
+    level === "error"
+      ? console.error
+      : level === "warn"
+      ? console.warn
+      : level === "debug" || level === "trace"
+      ? console.debug
+      : console.info;
+
+  if (meta !== undefined) {
+    logger(message, meta);
+    return;
+  }
+
+  logger(message);
+}
+
+function formatLogValue(value: unknown): unknown {
+  if (value === undefined || value === null) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    return value.length > 500 ? `${value.slice(0, 500)}...` : value;
+  }
+
+  if (typeof value === "object") {
+    try {
+      const serialized = JSON.stringify(value);
+      return serialized.length > 500 ? `${serialized.slice(0, 500)}...` : value;
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}
+
 function sendBadRequest(response: Response, message: string): void {
   response.status(400).json({ error: message });
 }
@@ -71,6 +138,30 @@ export function createServer(storage: StorageProvider): express.Express {
   const hasWebIndex = fs.existsSync(webIndexFile);
 
   app.use(express.json());
+  app.use((request: Request, response: Response, next: NextFunction) => {
+    if (!request.path.startsWith("/api")) {
+      return next();
+    }
+
+    const start = Date.now();
+
+    if (shouldLog("trace")) {
+      log("trace", `[api] request ${request.method} ${request.originalUrl}`, {
+        query: request.query,
+        body: formatLogValue(request.body),
+      });
+    }
+
+    response.on("finish", () => {
+      const duration = Date.now() - start;
+      log(
+        "info",
+        `[api] ${request.method} ${request.originalUrl} -> ${response.statusCode} (${duration}ms)`
+      );
+    });
+
+    next();
+  });
 
   app.get(
     "/api/problems",
@@ -326,7 +417,11 @@ export function createServer(storage: StorageProvider): express.Express {
   });
 
   app.use((error: Error, request: Request, response: Response, _next: NextFunction) => {
-    console.error(`[${new Date().toISOString()}] ${request.method} ${request.url}:`, error);
+    log(
+      "error",
+      `[${new Date().toISOString()}] ${request.method} ${request.url}:`,
+      error
+    );
     response.status(500).json({ error: "Internal server error. Please try again later." });
   });
 
@@ -338,6 +433,6 @@ export const app = createServer(storage);
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    log("info", `Server listening on port ${PORT}`);
   });
 }
