@@ -422,16 +422,14 @@ You are given an array `routes` representing bus routes where `routes[i]` is a b
    - Start at 1 (bus 0) → transfer at 3, 4, or 5 → take bus 2 to 6
    - 2 buses needed
 
-5. Input: routes = [[1,2,3,4,5,6,7],[8,9,10,11,12],[1,8,13,14],[5,12,15,16,17]], source = 1, target = 17, Output = 3  
+5. Input: routes = [[1,2,3,4,5,6,7],[8,9,10,11,12],[1,8,13,14],[5,12,15,16,17]], source = 1, target = 17, Output = 2  
    - Bus 0: [1, 2, 3, 4, 5, 6, 7]
    - Bus 1: [8, 9, 10, 11, 12]
    - Bus 2: [1, 8, 13, 14]
    - Bus 3: [5, 12, 15, 16, 17]
-   - Path: Start at 1 (bus 0) → transfer at 5 (bus 3) ... wait, need to check
-   - Better path: Start at 1 (bus 0 or 2) → via bus 0 to stop 5 → transfer to bus 3 → stop 12 → get to 17
-   - Actually: bus 0 (stop 1 to 5) → bus 3 (stop 5 to 17) = 2 buses
-   - Or: bus 2 (1 to 8) → bus 1 (8 to 12) → bus 3 (12 to 17) = 3 buses
-   - Minimum is 2 buses
+    - Minimal path: start on bus 0 at stop 1 → ride to stop 5 → transfer to bus 3 → ride to stop 17
+    - Alternative path via bus 2 then bus 1 then bus 3 would take 3 buses
+    - Minimum buses needed: 2
 
 ### Pseudocode:
 ```
@@ -525,3 +523,392 @@ public int NumBusesToDestination(int[][] routes, int source, int target) {
 **Time Complexity**: O(n × s) where n is the number of bus routes and s is the average number of stops per route. Each bus is processed once, and for each bus we check all its stops.
 
 **Space Complexity**: O(n × s) for the stop-to-buses map and visited set.
+
+---
+
+## Binary Tree Right Side View | LeetCode 199 | Medium
+Given the `root` of a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
+
+### Examples:
+1. Input: root = [1,2,3,null,5,null,4], Output = [1,3,4]  
+   - Level 0: see node 1 (rightmost)
+   - Level 1: see node 3 (rightmost between 2 and 3)
+   - Level 2: see node 4 (rightmost between 5 and 4)
+   - From right side: [1, 3, 4]
+
+2. Input: root = [1,null,3], Output = [1,3]  
+   - Level 0: see node 1
+   - Level 1: see node 3 (only node)
+   - From right side: [1, 3]
+
+3. Input: root = [], Output = []  
+   - Empty tree
+   - No nodes visible
+
+4. Input: root = [1,2,3,4], Output = [1,3,4]  
+   - Level 0: node 1
+   - Level 1: node 3 (rightmost)
+   - Level 2: node 4 (only node at this level)
+
+5. Input: root = [1,2,3,4,5,6,7,8], Output = [1,3,7,8]  
+   - Perfect binary tree structure
+   - Rightmost at each level: 1, 3, 7, 8
+
+### Pseudocode:
+```
+WHY BFS (LEVEL ORDER)?
+- Need rightmost node at each level
+- BFS processes tree level by level
+- Last node in each level = rightmost visible node
+- Track level boundaries using queue size
+- O(n) time to visit all nodes once
+
+1. If root is null, return empty list
+2. Initialize queue with root
+3. Initialize result list
+4. While queue not empty:
+   - Get level size (number of nodes at current level)
+   - For i from 0 to level size - 1:
+     - Dequeue node
+     - If i == level size - 1: add node.val to result (rightmost)
+     - Enqueue left child if exists
+     - Enqueue right child if exists
+5. Return result
+```
+
+### C# Solution:
+```csharp
+public IList<int> RightSideView(TreeNode root) {
+    List<int> result = new List<int>();
+    if (root == null) return result;
+    
+    Queue<TreeNode> queue = new Queue<TreeNode>();
+    queue.Enqueue(root);
+    
+    while (queue.Count > 0) {
+        int levelSize = queue.Count;
+        
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode node = queue.Dequeue();
+            
+            // Last node in this level is rightmost
+            if (i == levelSize - 1) {
+                result.Add(node.val);
+            }
+            
+            if (node.left != null) queue.Enqueue(node.left);
+            if (node.right != null) queue.Enqueue(node.right);
+        }
+    }
+    
+    return result;
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n) where n is the number of nodes. Each node is visited once.
+
+**Space Complexity**: O(w) where w is the maximum width of the tree (queue size at any level).
+
+---
+
+## Binary Tree Zigzag Level Order Traversal | LeetCode 103 | Medium
+Given the `root` of a binary tree, return the zigzag level order traversal of its nodes' values. (i.e., from left to right, then right to left for the next level and alternate between).
+
+### Examples:
+1. Input: root = [3,9,20,null,null,15,7], Output = [[3],[20,9],[15,7]]  
+   - Level 0: [3] (left to right)
+   - Level 1: [20,9] (right to left - reversed from [9,20])
+   - Level 2: [15,7] (left to right)
+
+2. Input: root = [1], Output = [[1]]  
+   - Single node
+   - Level 0: [1]
+
+3. Input: root = [], Output = []  
+   - Empty tree
+   - No levels
+
+4. Input: root = [1,2,3,4,null,null,5], Output = [[1],[3,2],[4,5]]  
+   - Level 0: [1] (left to right)
+   - Level 1: [3,2] (right to left)
+   - Level 2: [4,5] (left to right)
+
+5. Input: root = [1,2,3,4,5,6,7], Output = [[1],[3,2],[4,5,6,7]]  
+   - Perfect binary tree
+   - Alternating direction each level
+   - Level 2 has 4 nodes in left-to-right order
+
+### Pseudocode:
+```
+WHY BFS WITH DIRECTION FLAG?
+- Need level-order traversal (BFS)
+- Alternate direction at each level
+- Use flag to track left-to-right vs right-to-left
+- Reverse list when going right-to-left
+- O(n) time, visit each node once
+
+1. If root is null, return empty list
+2. Initialize queue with root
+3. Initialize result list, leftToRight = true
+4. While queue not empty:
+   - Get level size
+   - Initialize current level list
+   - For each node in level:
+     - Dequeue node
+     - Add node.val to current level
+     - Enqueue left and right children
+   - If not leftToRight: reverse current level
+   - Add current level to result
+   - Toggle leftToRight flag
+5. Return result
+```
+
+### C# Solution:
+```csharp
+public IList<IList<int>> ZigzagLevelOrder(TreeNode root) {
+    List<IList<int>> result = new List<IList<int>>();
+    if (root == null) return result;
+    
+    Queue<TreeNode> queue = new Queue<TreeNode>();
+    queue.Enqueue(root);
+    bool leftToRight = true;
+    
+    while (queue.Count > 0) {
+        int levelSize = queue.Count;
+        List<int> currentLevel = new List<int>();
+        
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode node = queue.Dequeue();
+            currentLevel.Add(node.val);
+            
+            if (node.left != null) queue.Enqueue(node.left);
+            if (node.right != null) queue.Enqueue(node.right);
+        }
+        
+        if (!leftToRight) {
+            currentLevel.Reverse();
+        }
+        
+        result.Add(currentLevel);
+        leftToRight = !leftToRight;
+    }
+    
+    return result;
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n) where n is the number of nodes. Each node is visited once.
+
+**Space Complexity**: O(w) where w is the maximum width of the tree.
+
+---
+
+## Maximum Width of Binary Tree | LeetCode 662 | Medium
+Given the `root` of a binary tree, return the maximum width of the given tree. The maximum width of a tree is the maximum width among all levels. The width of one level is defined as the length between the end-nodes (the leftmost and rightmost non-null nodes), where the null nodes between the end-nodes are also counted into the length calculation.
+
+### Examples:
+1. Input: root = [1,3,2,5,3,null,9], Output = 4  
+   - Level 0: [1] (width = 1)
+   - Level 1: [3,2] (width = 2)
+   - Level 2: [5,3,null,9] (width = 4, including null between 3 and 9)
+   - Maximum width = 4
+
+2. Input: root = [1,3,null,5,3], Output = 2  
+   - Level 0: [1] (width = 1)
+   - Level 1: [3] (width = 1)
+   - Level 2: [5,3] (width = 2)
+   - Maximum width = 2
+
+3. Input: root = [1,3,2,5], Output = 2  
+   - Level 0: width 1
+   - Level 1: width 2
+   - Level 2: width 1
+   - Maximum = 2
+
+4. Input: root = [1,3,2,5,null,null,9,6,null,null,7], Output = 8  
+   - Large width at deeper levels
+   - Count includes null nodes between leftmost and rightmost
+
+5. Input: root = [1], Output = 1  
+   - Single node
+   - Width = 1
+
+### Pseudocode:
+```
+WHY BFS WITH INDEX TRACKING?
+- Need to track position of each node as if tree were complete
+- In complete binary tree: left child at 2*i, right child at 2*i+1
+- Width = rightmost_index - leftmost_index + 1
+- BFS processes level by level
+- Track index for each node to calculate width
+- O(n) time, visit each node once
+
+1. If root is null, return 0
+2. Initialize queue with (root, index=0)
+3. Initialize maxWidth = 0
+4. While queue not empty:
+   - Get level size
+   - Get leftmost index in level
+   - For each node in level:
+     - Dequeue (node, index)
+     - Update rightmost index
+     - Enqueue left child with index 2*index
+     - Enqueue right child with index 2*index+1
+   - Calculate width = rightmost - leftmost + 1
+   - Update maxWidth
+5. Return maxWidth
+```
+
+### C# Solution:
+```csharp
+public int WidthOfBinaryTree(TreeNode root) {
+    if (root == null) return 0;
+    
+    Queue<(TreeNode node, int index)> queue = new Queue<(TreeNode, int)>();
+    queue.Enqueue((root, 0));
+    int maxWidth = 0;
+    
+    while (queue.Count > 0) {
+        int levelSize = queue.Count;
+        int leftmost = queue.Peek().index;
+        int rightmost = leftmost;
+        
+        for (int i = 0; i < levelSize; i++) {
+            var (node, index) = queue.Dequeue();
+            rightmost = index;
+            
+            if (node.left != null) {
+                queue.Enqueue((node.left, 2 * index));
+            }
+            if (node.right != null) {
+                queue.Enqueue((node.right, 2 * index + 1));
+            }
+        }
+        
+        maxWidth = Math.Max(maxWidth, rightmost - leftmost + 1);
+    }
+    
+    return maxWidth;
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n) where n is the number of nodes. Each node is visited once.
+
+**Space Complexity**: O(w) where w is the maximum width of the tree.
+
+---
+
+## Minimum Knight Moves | LeetCode 1197 | Medium
+In an infinite chess board with coordinates from -infinity to +infinity, you have a knight at square [0, 0]. A knight has 8 possible moves it can make. Return the minimum number of steps needed to move the knight to the square [x, y]. It is guaranteed the answer exists.
+
+### Examples:
+1. Input: x = 2, y = 1, Output = 1  
+   - One knight move: (0,0) → (2,1)
+   - Direct L-shape move
+
+2. Input: x = 5, y = 5, Output = 4  
+   - (0,0) → (2,1) → (4,2) → (3,4) → (5,5)
+   - Or: (0,0) → (1,2) → (3,3) → (5,4) → (5,5)
+   - Minimum 4 moves
+
+3. Input: x = 0, y = 0, Output = 0  
+   - Already at destination
+   - 0 moves
+
+4. Input: x = 1, y = 1, Output = 2  
+   - (0,0) → (2,1) → (1,1) or (0,0) → (1,2) → (1,1)
+   - Cannot reach (1,1) in one move
+   - Minimum 2 moves
+
+5. Input: x = 5, y = 1, Output = 4  
+   - One optimal path: (0,0) → (2,1) → (4,2) → (6,3) → (5,1)
+   - Cannot reach (5,1) in 2 moves
+   - Minimum moves required: 4
+
+### Pseudocode:
+```
+WHY BFS?
+- Need shortest path = minimum moves
+- BFS guarantees shortest path in unweighted graph
+- Each position is a node, knight moves are edges
+- 8 possible directions from any position
+- Use visited set to avoid revisiting positions
+- O(x*y) in practical cases, BFS explores necessary positions
+
+1. If x == 0 and y == 0: return 0
+2. Initialize 8 knight move directions: [(2,1), (1,2), (-1,2), (-2,1), (-2,-1), (-1,-2), (1,-2), (2,-1)]
+3. Initialize queue with (0, 0)
+4. Initialize visited set with (0, 0)
+5. Initialize moves = 0
+6. While queue not empty:
+   - Get level size
+   - For each position in level:
+     - Dequeue (row, col)
+     - If row == x and col == y: return moves
+     - For each direction:
+       - Calculate new position (newRow, newCol)
+       - Optimization: use abs(newRow) + abs(newCol) bounds to limit search
+       - If not visited:
+         - Mark visited
+         - Enqueue new position
+   - Increment moves
+7. Return moves
+```
+
+### C# Solution:
+```csharp
+public int MinKnightMoves(int x, int y) {
+    // Work in positive quadrant due to symmetry
+    x = Math.Abs(x);
+    y = Math.Abs(y);
+    
+    int[][] directions = new int[][] {
+        new int[] {2, 1}, new int[] {1, 2}, new int[] {-1, 2}, new int[] {-2, 1},
+        new int[] {-2, -1}, new int[] {-1, -2}, new int[] {1, -2}, new int[] {2, -1}
+    };
+    
+    Queue<(int, int)> queue = new Queue<(int, int)>();
+    HashSet<(int, int)> visited = new HashSet<(int, int)>();
+    
+    queue.Enqueue((0, 0));
+    visited.Add((0, 0));
+    int moves = 0;
+    
+    while (queue.Count > 0) {
+        int size = queue.Count;
+        
+        for (int i = 0; i < size; i++) {
+            var (row, col) = queue.Dequeue();
+            
+            if (row == x && col == y) return moves;
+            
+            foreach (var dir in directions) {
+                int newRow = row + dir[0];
+                int newCol = col + dir[1];
+                
+                // Optimization: limit search space
+                if (!visited.Contains((newRow, newCol)) && newRow >= -2 && newCol >= -2) {
+                    visited.Add((newRow, newCol));
+                    queue.Enqueue((newRow, newCol));
+                }
+            }
+        }
+        
+        moves++;
+    }
+    
+    return moves;
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(max(|x|, |y|)²) - BFS explores positions within the target area.
+
+**Space Complexity**: O(max(|x|, |y|)²) for the visited set and queue.

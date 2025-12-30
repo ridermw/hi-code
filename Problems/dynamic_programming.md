@@ -46,7 +46,7 @@ Use DP when:
 
 ---
 
-## Climbing Stairs / Counting Bits | LeetCode 338 | Easy
+## Counting Bits | LeetCode 338 | Easy
 Given an integer `n`, return an array `ans` of length `n + 1` such that for each `i` (0 <= i <= n), `ans[i]` is the number of 1's in the binary representation of `i`.
 
 ### Examples:
@@ -204,13 +204,11 @@ Given an integer array `nums`, return the length of the longest strictly increas
    - Length 1
 
 4. Input: nums = [1,3,6,7,9,4,10,5,6], Output = 6  
-   - LIS: [1,3,4,5,6,9] or [1,3,6,7,9,10]
-   - Actually [1,3,6,7,9,10] = 6
+   - LIS: [1,3,6,7,9,10] (length 6)
 
 5. Input: nums = [3,5,6,2,5,4,19,5,6,7,12], Output = 6  
    - Multiple LIS exist
-   - Example: [3,5,6,7,12,19] = 6? Let me check: [3,5,6,19] = 4
-   - Actually: [2,4,5,6,7,12] = 6 or [2,5,6,7,12,19] = 6
+   - Example: [2,4,5,6,7,12] (length 6)
 
 ### Pseudocode:
 ```
@@ -326,3 +324,277 @@ public bool WordBreak(string s, IList<string> wordDict) {
 **Time Complexity**: O(n² × m) where n is length of string and m is average word length (for substring operation).
 
 **Space Complexity**: O(n) for the dp array plus O(k) for the set where k is number of words.
+
+---
+
+## Decode Ways | LeetCode 91 | Medium
+A message containing letters from A-Z can be encoded into numbers using the following mapping: 'A' -> "1", 'B' -> "2", ..., 'Z' -> "26". To decode an encoded message, all the digits must be grouped then mapped back into letters using the reverse of the mapping above. Given a string `s` containing only digits, return the number of ways to decode it.
+
+### Examples:
+1. Input: s = "12", Output = 2  
+   - "12" can be decoded as "AB" (1 2) or "L" (12)
+   - Two ways
+
+2. Input: s = "226", Output = 3  
+   - "2 2 6" → "BBF"
+   - "22 6" → "VF"
+   - "2 26" → "BZ"
+   - Three ways
+
+3. Input: s = "06", Output = 0  
+   - "0" cannot be mapped (invalid)
+   - "06" cannot be mapped (leading zero)
+   - Zero ways
+
+4. Input: s = "11106", Output = 2  
+   - "1 1 10 6" → "AAJF"
+   - "11 10 6" → "KJF"
+   - "1 1 1 06" → invalid (06 has leading zero)
+   - "11 1 06" → invalid
+   - Two ways
+
+5. Input: s = "10", Output = 1  
+   - "10" → "J"
+   - "1 0" → invalid (0 cannot be mapped alone)
+   - One way
+
+### Pseudocode:
+```
+WHY DP?
+- Subproblem: ways(i) = ways to decode s[i..n]
+- Recurrence: ways(i) = ways(i+1) if s[i] valid + ways(i+2) if s[i:i+2] valid
+- Overlapping subproblems (ways(i) used multiple times)
+- Bottom-up: dp[i] = ways to decode s[0..i]
+- O(n) time, O(n) space (can optimize to O(1))
+
+1. If s is empty or starts with '0': return 0
+2. Initialize dp array of size n+1
+3. dp[0] = 1 (empty string: one way)
+4. dp[1] = 1 if s[0] != '0', else 0
+5. For i from 2 to n:
+   - ways = 0
+   - If s[i-1] != '0': ways += dp[i-1] (single digit decode)
+   - twoDigit = s[i-2:i] as integer
+   - If 10 <= twoDigit <= 26: ways += dp[i-2] (two digit decode)
+   - dp[i] = ways
+6. Return dp[n]
+```
+
+### C# Solution:
+```csharp
+public int NumDecodings(string s) {
+    if (string.IsNullOrEmpty(s) || s[0] == '0') return 0;
+    
+    int n = s.Length;
+    int[] dp = new int[n + 1];
+    dp[0] = 1; // Empty string
+    dp[1] = 1; // First character (already checked not '0')
+    
+    for (int i = 2; i <= n; i++) {
+        // Single digit decode
+        if (s[i - 1] != '0') {
+            dp[i] += dp[i - 1];
+        }
+        
+        // Two digit decode
+        int twoDigit = int.Parse(s.Substring(i - 2, 2));
+        if (twoDigit >= 10 && twoDigit <= 26) {
+            dp[i] += dp[i - 2];
+        }
+    }
+    
+    return dp[n];
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n) where n is the length of string. Single pass through string.
+
+**Space Complexity**: O(n) for dp array. Can be optimized to O(1) by tracking only last two values.
+
+---
+
+## Maximal Square | LeetCode 221 | Medium
+Given an `m x n` binary matrix filled with 0's and 1's, find the largest square containing only 1's and return its area.
+
+### Examples:
+1. Input: matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]], Output = 4  
+   - Largest square is 2×2 (area = 4)
+   - Located at rows 1-2, cols 2-3
+   - All cells are '1'
+
+2. Input: matrix = [["0","1"],["1","0"]], Output = 1  
+   - No 2×2 square of 1's
+   - Largest is 1×1 (area = 1)
+
+3. Input: matrix = [["0"]], Output = 0  
+   - Single cell is '0'
+   - No square of 1's
+
+4. Input: matrix = [["1","1"],["1","1"]], Output = 4  
+   - Entire 2×2 matrix is a square
+   - Area = 4
+
+5. Input: matrix = [["1","1","1"],["1","1","1"],["0","1","1"]], Output = 4  
+   - Largest square is 2×2 at top-right or center-right
+   - Area = 4
+
+### Pseudocode:
+```
+WHY DP?
+- Subproblem: dp[i][j] = side length of largest square ending at (i,j)
+- Recurrence: if matrix[i][j] == '1':
+    dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1
+- This ensures square property (all sides equal)
+- Track maximum side length seen
+- O(m × n) time and space
+
+1. Initialize dp matrix of size (m+1) × (n+1) with zeros
+2. Initialize maxSide = 0
+3. For i from 1 to m:
+   - For j from 1 to n:
+     - If matrix[i-1][j-1] == '1':
+       - dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1
+       - maxSide = max(maxSide, dp[i][j])
+4. Return maxSide × maxSide
+```
+
+### C# Solution:
+```csharp
+public int MaximalSquare(char[][] matrix) {
+    if (matrix.Length == 0) return 0;
+    
+    int rows = matrix.Length;
+    int cols = matrix[0].Length;
+    int[,] dp = new int[rows + 1, cols + 1];
+    int maxSide = 0;
+    
+    for (int i = 1; i <= rows; i++) {
+        for (int j = 1; j <= cols; j++) {
+            if (matrix[i - 1][j - 1] == '1') {
+                dp[i, j] = Math.Min(Math.Min(dp[i - 1, j], dp[i, j - 1]), dp[i - 1, j - 1]) + 1;
+                maxSide = Math.Max(maxSide, dp[i, j]);
+            }
+        }
+    }
+    
+    return maxSide * maxSide;
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(m × n) where m and n are matrix dimensions.
+
+**Space Complexity**: O(m × n) for dp matrix. Can be optimized to O(n) with rolling array.
+
+---
+
+## Maximum Profit in Job Scheduling | LeetCode 1235 | Hard
+We have `n` jobs, where every job is scheduled to be done from `startTime[i]` to `endTime[i]`, obtaining a profit of `profit[i]`. You're given the `startTime`, `endTime` and `profit` arrays, return the maximum profit you can take such that there are no two jobs in the subset with overlapping time range.
+
+### Examples:
+1. Input: startTime = [1,2,3,3], endTime = [3,4,5,6], profit = [50,10,40,70], Output = 120  
+   - Take jobs at indices 0 and 3: time [1,3] and [3,6], profit = 50 + 70 = 120
+   - Jobs don't overlap (3 is end of first, start of second)
+
+2. Input: startTime = [1,2,3,4,6], endTime = [3,5,10,6,9], profit = [20,20,100,70,60], Output = 150  
+   - Take jobs at indices 1 and 4: [2,5] and [6,9], profit = 20 + 60 = 80
+   - Or take jobs 0 and 4: [1,3] and [6,9], profit = 20 + 60 = 80
+   - Best: Take job 2 alone [3,10] = 100, or job 0 [1,3] + job 4 [6,9] = 80
+   - Actually best is job 0 [1,3] + job 3 [4,6] + job 4 [6,9] = 20 + 70 + 60 = 150
+
+3. Input: startTime = [1,1,1], endTime = [2,3,4], profit = [5,6,4], Output = 6  
+   - All jobs start at time 1, can only pick one
+   - Maximum profit is 6
+
+4. Input: startTime = [1,2,3,4], endTime = [2,3,4,5], profit = [10,10,10,10], Output = 40  
+   - All jobs are non-overlapping sequential
+   - Take all: 10 + 10 + 10 + 10 = 40
+
+5. Input: startTime = [6,15,7,11,1,3,16,2], endTime = [19,18,19,16,10,8,19,8], profit = [2,9,1,19,5,7,3,19], Output = 41  
+   - Complex scheduling problem
+   - Optimal selection maximizes profit
+
+### Pseudocode:
+```
+WHY DP WITH BINARY SEARCH?
+- Similar to weighted job scheduling
+- Sort jobs by end time
+- For each job: choose to take it or skip it
+- If take: profit[i] + dp[last_compatible_job]
+- Use binary search to find last compatible job (ends before current starts)
+- O(n log n) time
+
+1. Create array of (start, end, profit) tuples
+2. Sort by end time
+3. Initialize dp array where dp[i] = max profit using jobs 0..i
+4. dp[0] = profit[0]
+5. For i from 1 to n-1:
+   - profitWithCurrent = profit[i]
+   - Use binary search to find last job j where endTime[j] <= startTime[i]
+   - If found: profitWithCurrent += dp[j]
+   - dp[i] = max(dp[i-1], profitWithCurrent)
+6. Return dp[n-1]
+```
+
+### C# Solution:
+```csharp
+public int JobScheduling(int[] startTime, int[] endTime, int[] profit) {
+    int n = startTime.Length;
+    var jobs = new List<(int start, int end, int profit)>();
+    
+    for (int i = 0; i < n; i++) {
+        jobs.Add((startTime[i], endTime[i], profit[i]));
+    }
+    
+    // Sort by end time
+    jobs.Sort((a, b) => a.end.CompareTo(b.end));
+    
+    int[] dp = new int[n];
+    dp[0] = jobs[0].profit;
+    
+    for (int i = 1; i < n; i++) {
+        // Option 1: Skip current job
+        int profitWithoutCurrent = dp[i - 1];
+        
+        // Option 2: Take current job
+        int profitWithCurrent = jobs[i].profit;
+        
+        // Binary search for last compatible job
+        int lastCompatible = FindLastCompatible(jobs, i);
+        if (lastCompatible != -1) {
+            profitWithCurrent += dp[lastCompatible];
+        }
+        
+        dp[i] = Math.Max(profitWithoutCurrent, profitWithCurrent);
+    }
+    
+    return dp[n - 1];
+}
+
+private int FindLastCompatible(List<(int start, int end, int profit)> jobs, int currentIndex) {
+    int left = 0, right = currentIndex - 1;
+    int result = -1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (jobs[mid].end <= jobs[currentIndex].start) {
+            result = mid;
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return result;
+}
+```
+
+### Complexity
+
+**Time Complexity**: O(n log n) for sorting and n binary searches.
+
+**Space Complexity**: O(n) for the dp array and jobs list.

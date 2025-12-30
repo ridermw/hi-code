@@ -64,6 +64,8 @@ Use backtracking when:
 ## Subsets | LeetCode 78 | Medium
 Given an integer array `nums` of unique elements, return all possible subsets (the power set). The solution set must not contain duplicate subsets. Return the solution in any order.
 
+**Note:** If `nums` can contain duplicates, sort first and skip equal neighbors when iterating to avoid duplicate subsets.
+
 ### Examples:
 1. Input: nums = [1,2,3], Output = [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]  
    - Empty set: []
@@ -143,6 +145,7 @@ Given `n` pairs of parentheses, write a function to generate all combinations of
 1. Input: n = 3, Output = ["((()))","(()())","(())()","()(())","()()()"]  
    - 3 pairs: 6 characters total (3 open, 3 close)
    - 5 valid combinations (Catalan number C_3 = 5)
+   - Catalan numbers count the number of valid parentheses combinations for n pairs
    - All must be balanced and well-formed
 
 2. Input: n = 1, Output = ["()"]  
@@ -337,9 +340,10 @@ WHY BACKTRACKING?
 - Start from every cell that matches first character
 - Time: O(m*n * 4^L) where L is word length
 
+0. If word is empty: return true; if board is empty: return false
 1. For each cell (i, j) in board:
-   - If board[i][j] == word[0]:
-     If DFS(i, j, 0) returns true: return true
+    - If board[i][j] == word[0]:
+       If DFS(i, j, 0) returns true: return true
 2. DFS function(row, col, index):
    - If index == word length: return true (found complete word)
    - If out of bounds or visited or board[row][col] != word[index]: return false
@@ -354,6 +358,8 @@ WHY BACKTRACKING?
 ### C# Solution:
 ```csharp
 public bool Exist(char[][] board, string word) {
+   if (string.IsNullOrEmpty(word)) return true;
+   if (board == null || board.Length == 0 || board[0].Length == 0) return false;
     int rows = board.Length;
     int cols = board[0].Length;
     

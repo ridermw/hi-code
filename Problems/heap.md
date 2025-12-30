@@ -80,8 +80,8 @@ Given an integer array `nums` and an integer `k`, return the kth largest element
 
 5. Input: nums = [3,2,3,1,2,4,5,5,6,7,7,8,2,3,1,1,1,10,11,5,6,2,4,7,8,5,6], k = 20, Output = 2  
    - Large array with duplicates (27 elements)
-   - Sorted: [11,10,8,8,7,7,7,6,6,6,5,5,5,5,4,4,3,3,3,3,2,2,2,2,1,1,1]
-   - 20th largest is 3
+   - Sorted: [11,10,8,8,7,7,7,6,6,6,5,5,5,5,4,4,3,3,3,2,2,2,2,1,1,1,1]
+   - 20th largest is 2
    - Maintain heap of size 20, root gives answer
 
 ### Pseudocode:
@@ -316,7 +316,7 @@ Given a sorted integer array `arr`, two integers `k` and `x`, return the `k` clo
    - Closest: 4 (dist 1), then 3 and 3 (dist 2), then ties
    - Result: [3,3,4]
 
-5. Input: arr = [1,3,5,7,9,11,13,15,17,19], k = 5, x = 10, Output = [7,9,11,13,15]  
+5. Input: arr = [1,3,5,7,9,11,13,15,17,19], k = 5, x = 10, Output = [5,7,9,11,13]  
    - 10 elements, need 5 closest to 10
    - Distances: |1-10|=9, |3-10|=7, |5-10|=5, |7-10|=3, |9-10|=1, |11-10|=1, |13-10|=3, |15-10|=5, |17-10|=7, |19-10|=9
    - Closest: 9 (dist 1), 11 (dist 1), 7 (dist 3), 13 (dist 3), then 5 or 15 (dist 5)
