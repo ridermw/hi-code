@@ -27,6 +27,30 @@ export interface ProblemSummary {
   difficulty: string;
 }
 
+export interface Flashcard {
+  id: string;
+  category: string;
+  term: string;
+  definition: string;
+  whenToUse: string[];
+  genericPatterns: string[];
+  simpleExamples: string[];
+  algorithmPrompt?: string;
+  difficultyStarred: boolean;
+}
+
+export interface FlashcardCategory {
+  id: string;
+  name: string;
+  description?: string;
+  totalCards: number;
+}
+
+export interface FlashcardSet {
+  category: FlashcardCategory;
+  cards: Flashcard[];
+}
+
 export interface AttemptSelections {
   algorithms: string;
   implementations: string;
@@ -45,4 +69,5 @@ export interface User {
   name: string;
   createdAt: string;
   attempts: Record<string, Attempt[]>;
+  flashcardStars: Record<string, string[]>;
 }

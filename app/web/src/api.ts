@@ -1,6 +1,9 @@
+import { createLogger, normalizeLogLevel } from "@hi-code/logging";
 import {
   AttemptEvaluation,
   AttemptSelections,
+  FlashcardCategory,
+  FlashcardSet,
   ProblemDetail,
   ProblemSummary,
   UserProfile,
@@ -8,7 +11,14 @@ import {
 
 const API_BASE = "/api";
 
-async function handleJsonResponse<T>(response: Response): Promise<T> {
+const { log, shouldLog, formatLogValue } = createLogger(
+  normalizeLogLevel(import.meta.env.VITE_LOG_LEVEL),
+);
+
+async function handleJsonResponse<T>(
+  response: Response,
+  context?: { method: string; url: string; startTime: number },
+): Promise<T> {
   const text = await response.text();
   let data: unknown = null;
 
@@ -18,13 +28,26 @@ async function handleJsonResponse<T>(response: Response): Promise<T> {
     data = text;
   }
 
+  if (context) {
+    const duration = Math.round(performance.now() - context.startTime);
+    const statusMessage = `[api] ${context.method} ${context.url} -> ${response.status} (${duration}ms)`;
+    log(response.ok ? "info" : "warn", statusMessage);
+
+    if (shouldLog("trace")) {
+      log("trace", "[api] response", formatLogValue(data ?? text));
+    }
+  }
+
   if (!response.ok) {
     const errorMessage =
       typeof data === "string"
         ? data
-        : data && typeof data === "object" && "error" in data && typeof (data as { error?: unknown }).error === "string"
-        ? (data as { error: string }).error
-        : "Request failed";
+        : data &&
+            typeof data === "object" &&
+            "error" in data &&
+            typeof (data as { error?: unknown }).error === "string"
+          ? (data as { error: string }).error
+          : "Request failed";
 
     throw new Error(errorMessage);
   }
@@ -32,63 +55,142 @@ async function handleJsonResponse<T>(response: Response): Promise<T> {
   return data as T;
 }
 
+async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const method = init?.method ?? "GET";
+  const startTime = performance.now();
+  let response: Response | null = null;
+
+  log("info", `[api] ${method} ${url}`);
+
+  if (shouldLog("trace")) {
+    log("trace", "[api] request", {
+      headers: formatLogValue(init?.headers),
+      body: formatLogValue(init?.body),
+    });
+  }
+
+  try {
+    response = await fetch(url, init);
+    return await handleJsonResponse<T>(response, { method, url, startTime });
+  } catch (error) {
+    if (!response) {
+      const duration = Math.round(performance.now() - startTime);
+      log(
+        "error",
+        `[api] ${method} ${url} -> network error (${duration}ms)`,
+        error,
+      );
+    }
+    throw error;
+  }
+}
+
 export async function createUser(name: string): Promise<UserProfile> {
-  const response = await fetch(`${API_BASE}/users`, {
+  return requestJson<UserProfile>(`${API_BASE}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ name }),
   });
-
-  return handleJsonResponse<UserProfile>(response);
 }
 
 export async function fetchUser(userId: string): Promise<UserProfile> {
-  const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/progress`);
-  return handleJsonResponse<UserProfile>(response);
+  return requestJson<UserProfile>(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/progress`,
+  );
 }
 
 export async function fetchProblems(): Promise<ProblemSummary[]> {
-  const response = await fetch(`${API_BASE}/problems`);
-  const data = await handleJsonResponse<{ problems: ProblemSummary[] }>(response);
+  const data = await requestJson<{ problems: ProblemSummary[] }>(
+    `${API_BASE}/problems`,
+  );
   return data.problems;
 }
 
+export async function fetchFlashcardCategories(): Promise<FlashcardCategory[]> {
+  const data = await requestJson<{ categories: FlashcardCategory[] }>(
+    `${API_BASE}/flashcards`,
+  );
+  return data.categories;
+}
+
+export async function fetchFlashcards(
+  categoryId: string,
+): Promise<FlashcardSet> {
+  return requestJson<FlashcardSet>(
+    `${API_BASE}/flashcards/${encodeURIComponent(categoryId)}`,
+  );
+}
+
+export async function fetchFlashcardStars(
+  userId: string,
+  categoryId: string,
+): Promise<string[]> {
+  const data = await requestJson<{ starredIds: string[] }>(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}`,
+  );
+  return data.starredIds;
+}
+
+export async function updateFlashcardStar(
+  userId: string,
+  categoryId: string,
+  cardId: string,
+  starred: boolean,
+): Promise<string[]> {
+  const data = await requestJson<{ starredIds: string[] }>(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/flashcards/${encodeURIComponent(categoryId)}/star`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ cardId, starred }),
+    },
+  );
+  return data.starredIds;
+}
+
 export async function fetchProblem(problemId: string): Promise<ProblemDetail> {
-  const response = await fetch(`${API_BASE}/problems/${encodeURIComponent(problemId)}`);
-  return handleJsonResponse<ProblemDetail>(response);
+  return requestJson<ProblemDetail>(
+    `${API_BASE}/problems/${encodeURIComponent(problemId)}`,
+  );
 }
 
 export async function submitAttempt(
   userId: string,
   problemId: string,
-  selections: AttemptSelections
+  selections: AttemptSelections,
 ): Promise<AttemptEvaluation> {
-  const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/attempts`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  return requestJson<AttemptEvaluation>(
+    `${API_BASE}/users/${encodeURIComponent(userId)}/attempts`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ problemId, selections }),
     },
-    body: JSON.stringify({ problemId, selections }),
-  });
-
-  return handleJsonResponse<AttemptEvaluation>(response);
+  );
 }
 
 export async function resetUserProgress(userId: string): Promise<UserProfile> {
-  const response = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/reset`, {
+  const data = await requestJson<{
+    attempts: UserProfile["attempts"];
+    id: string;
+    name: string;
+    createdAt: string;
+    flashcardStars: UserProfile["flashcardStars"];
+  }>(`${API_BASE}/users/${encodeURIComponent(userId)}/reset`, {
     method: "POST",
   });
-
-  const data = await handleJsonResponse<{ attempts: UserProfile["attempts"]; id: string; name: string; createdAt: string }>(
-    response
-  );
 
   return {
     id: data.id,
     name: data.name,
     createdAt: data.createdAt,
     attempts: data.attempts,
+    flashcardStars: data.flashcardStars,
   };
 }

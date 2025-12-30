@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import express, { NextFunction, Request, Response } from "express";
+import { createLogger, normalizeLogLevel } from "@hi-code/logging";
 import { FileStorageProvider } from "./storage/fileStorageProvider";
 import { StorageProvider } from "./storage/storageProvider";
 import { Attempt, AttemptSelections, Problem, ProblemSection } from "./types";
@@ -14,6 +15,10 @@ const REQUIRED_SECTIONS: ProblemSection[] = [
   "spaceComplexities",
 ];
 
+const { log, shouldLog, formatLogValue } = createLogger(
+  normalizeLogLevel(process.env.HI_CODE_LOG_LEVEL ?? process.env.LOG_LEVEL),
+);
+
 function sendBadRequest(response: Response, message: string): void {
   response.status(400).json({ error: message });
 }
@@ -25,7 +30,7 @@ function sendNotFound(response: Response, message: string): void {
 type AsyncHandler = (
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => Promise<void>;
 
 function asyncHandler(handler: AsyncHandler) {
@@ -36,9 +41,13 @@ function asyncHandler(handler: AsyncHandler) {
 
 function validateSelections(
   problem: Problem,
-  selections: AttemptSelections | undefined | null
+  selections: AttemptSelections | undefined | null,
 ): string | null {
-  if (selections === null || selections === undefined || typeof selections !== "object") {
+  if (
+    selections === null ||
+    selections === undefined ||
+    typeof selections !== "object"
+  ) {
     return "Selections for each section are required.";
   }
 
@@ -71,13 +80,60 @@ export function createServer(storage: StorageProvider): express.Express {
   const hasWebIndex = fs.existsSync(webIndexFile);
 
   app.use(express.json());
+  app.use((request: Request, response: Response, next: NextFunction) => {
+    if (!request.path.startsWith("/api")) {
+      return next();
+    }
+
+    const start = Date.now();
+
+    if (shouldLog("trace")) {
+      log("trace", `[api] request ${request.method} ${request.originalUrl}`, {
+        query: request.query,
+        body: formatLogValue(request.body),
+      });
+    }
+
+    response.on("finish", () => {
+      const duration = Date.now() - start;
+      log(
+        "info",
+        `[api] ${request.method} ${request.originalUrl} -> ${response.statusCode} (${duration}ms)`,
+      );
+    });
+
+    next();
+  });
 
   app.get(
     "/api/problems",
     asyncHandler(async (_request: Request, response: Response) => {
       const problems = await storage.getProblems();
       response.json({ problems });
-    })
+    }),
+  );
+
+  app.get(
+    "/api/flashcards",
+    asyncHandler(async (_request: Request, response: Response) => {
+      const categories = await storage.getFlashcardCategories();
+      response.json({ categories });
+    }),
+  );
+
+  app.get(
+    "/api/flashcards/:categoryId",
+    asyncHandler(async (request: Request, response: Response) => {
+      const set = await storage.getFlashcardsByCategory(
+        request.params.categoryId,
+      );
+
+      if (!set) {
+        return sendNotFound(response, "Flashcard category not found.");
+      }
+
+      response.json(set);
+    }),
   );
 
   app.get(
@@ -91,7 +147,7 @@ export function createServer(storage: StorageProvider): express.Express {
 
       const { answerKey, ...problemWithoutAnswer } = problem;
       response.json(problemWithoutAnswer);
-    })
+    }),
   );
 
   app.post(
@@ -105,7 +161,7 @@ export function createServer(storage: StorageProvider): express.Express {
 
       const user = await storage.createUser(name.trim());
       response.status(201).json(user);
-    })
+    }),
   );
 
   app.get(
@@ -122,8 +178,85 @@ export function createServer(storage: StorageProvider): express.Express {
         name: user.name,
         createdAt: user.createdAt,
         attempts: user.attempts,
+        flashcardStars: user.flashcardStars,
       });
-    })
+    }),
+  );
+
+  app.get(
+    "/api/users/:userId/flashcards/:categoryId",
+    asyncHandler(async (request: Request, response: Response) => {
+      const user = await storage.getUser(request.params.userId);
+
+      if (!user) {
+        return sendNotFound(response, "User not found.");
+      }
+
+      const categoryId = request.params.categoryId;
+      const set = await storage.getFlashcardsByCategory(categoryId);
+
+      if (!set) {
+        return sendNotFound(response, "Flashcard category not found.");
+      }
+
+      response.json({
+        categoryId,
+        starredIds: user.flashcardStars[categoryId] ?? [],
+      });
+    }),
+  );
+
+  app.post(
+    "/api/users/:userId/flashcards/:categoryId/star",
+    asyncHandler(async (request: Request, response: Response) => {
+      const { cardId, starred } = request.body ?? {};
+
+      if (typeof cardId !== "string" || !cardId.trim()) {
+        return sendBadRequest(response, "A cardId is required.");
+      }
+
+      if (typeof starred !== "boolean") {
+        return sendBadRequest(response, "Starred must be a boolean.");
+      }
+
+      const user = await storage.getUser(request.params.userId);
+
+      if (!user) {
+        return sendNotFound(response, "User not found.");
+      }
+
+      const categoryId = request.params.categoryId;
+      const set = await storage.getFlashcardsByCategory(categoryId);
+
+      if (!set) {
+        return sendNotFound(response, "Flashcard category not found.");
+      }
+
+      const cardExists = set.cards.some((card) => card.id === cardId);
+
+      if (!cardExists) {
+        return sendBadRequest(
+          response,
+          "Flashcard not found in this category.",
+        );
+      }
+
+      const existing = new Set(user.flashcardStars[categoryId] ?? []);
+
+      if (starred) {
+        existing.add(cardId);
+      } else {
+        existing.delete(cardId);
+      }
+
+      user.flashcardStars[categoryId] = Array.from(existing);
+      await storage.saveUser(user);
+
+      response.json({
+        categoryId,
+        starredIds: user.flashcardStars[categoryId],
+      });
+    }),
   );
 
   app.post(
@@ -168,7 +301,7 @@ export function createServer(storage: StorageProvider): express.Express {
           implementations: false,
           timeComplexities: false,
           spaceComplexities: false,
-        }
+        },
       );
 
       const attempt: Attempt = {
@@ -186,7 +319,7 @@ export function createServer(storage: StorageProvider): express.Express {
         attempt,
         overallCorrect: Object.values(correctness).every((value) => value),
       });
-    })
+    }),
   );
 
   app.post(
@@ -207,32 +340,49 @@ export function createServer(storage: StorageProvider): express.Express {
         name: user.name,
         createdAt: user.createdAt,
         attempts: user.attempts,
+        flashcardStars: user.flashcardStars,
       });
-    })
+    }),
   );
 
   app.use(express.static(webDistDir));
 
-  app.get("*", async (request: Request, response: Response, next: NextFunction) => {
-    if (request.path.startsWith("/api")) {
-      return next();
-    }
-
-    if (!hasWebIndex) {
-      return next();
-    }
-
-    response.sendFile(webIndexFile, (error) => {
-      if (error) {
-        next(error);
+  app.get(
+    "*",
+    async (request: Request, response: Response, next: NextFunction) => {
+      if (request.path.startsWith("/api")) {
+        return next();
       }
-    });
-  });
 
-  app.use((error: Error, request: Request, response: Response, _next: NextFunction) => {
-    console.error(`[${new Date().toISOString()}] ${request.method} ${request.url}:`, error);
-    response.status(500).json({ error: "Internal server error. Please try again later." });
-  });
+      if (!hasWebIndex) {
+        return next();
+      }
+
+      response.sendFile(webIndexFile, (error) => {
+        if (error) {
+          next(error);
+        }
+      });
+    },
+  );
+
+  app.use(
+    (
+      error: Error,
+      request: Request,
+      response: Response,
+      _next: NextFunction,
+    ) => {
+      log(
+        "error",
+        `[${new Date().toISOString()}] ${request.method} ${request.url}:`,
+        error,
+      );
+      response
+        .status(500)
+        .json({ error: "Internal server error. Please try again later." });
+    },
+  );
 
   return app;
 }
@@ -242,6 +392,6 @@ export const app = createServer(storage);
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+    log("info", `Server listening on port ${PORT}`);
   });
 }

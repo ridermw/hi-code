@@ -1,27 +1,33 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { fetchProblem, submitAttempt } from "../api";
 import { Link, useNavigation, useRouteParams } from "../router";
-import { AttemptCorrectness, AttemptSelections, ProblemDetail, ProblemSection } from "../types";
+import {
+  AttemptCorrectness,
+  AttemptSelections,
+  ProblemDetail,
+  ProblemSection,
+} from "../types";
 import { useUser } from "../user";
 
-const SECTION_COPY: Record<ProblemSection, { title: string; helper: string }> = {
-  algorithms: {
-    title: "Algorithm",
-    helper: "Pick the overall approach for solving Two Sum.",
-  },
-  implementations: {
-    title: "Implementation",
-    helper: "Choose the concrete implementation strategy.",
-  },
-  timeComplexities: {
-    title: "Time complexity",
-    helper: "How efficient is the algorithm as input grows?",
-  },
-  spaceComplexities: {
-    title: "Space complexity",
-    helper: "Select the extra memory requirements.",
-  },
-};
+const SECTION_COPY: Record<ProblemSection, { title: string; helper: string }> =
+  {
+    algorithms: {
+      title: "Algorithm",
+      helper: "Pick the overall approach for solving Two Sum.",
+    },
+    implementations: {
+      title: "Implementation",
+      helper: "Choose the concrete implementation strategy.",
+    },
+    timeComplexities: {
+      title: "Time complexity",
+      helper: "How efficient is the algorithm as input grows?",
+    },
+    spaceComplexities: {
+      title: "Space complexity",
+      helper: "Select the extra memory requirements.",
+    },
+  };
 
 const SECTION_ORDER: ProblemSection[] = [
   "algorithms",
@@ -70,8 +76,10 @@ export function ProblemDetailPage(): JSX.Element {
   const [resetting, setResetting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [selections, setSelections] = useState<SelectionState>(EMPTY_SELECTIONS);
-  const [lastCorrectness, setLastCorrectness] = useState<AttemptCorrectness | null>(null);
+  const [selections, setSelections] =
+    useState<SelectionState>(EMPTY_SELECTIONS);
+  const [lastCorrectness, setLastCorrectness] =
+    useState<AttemptCorrectness | null>(null);
   const [overallResult, setOverallResult] = useState<boolean | null>(null);
 
   const problemId = params.id;
@@ -85,7 +93,9 @@ export function ProblemDetailPage(): JSX.Element {
 
     fetchProblem(problemId)
       .then((data) => setProblem(data))
-      .catch((loadError: any) => setError(loadError?.message ?? "Could not load problem."))
+      .catch((loadError: any) =>
+        setError(loadError?.message ?? "Could not load problem."),
+      )
       .finally(() => setLoading(false));
   }, [problemId]);
 
@@ -98,8 +108,8 @@ export function ProblemDetailPage(): JSX.Element {
   }, [problemId]);
 
   const attemptHistory = useMemo(
-    () => (user && problemId ? user.attempts[problemId] ?? [] : []),
-    [user, problemId]
+    () => (user && problemId ? (user.attempts[problemId] ?? []) : []),
+    [user, problemId],
   );
 
   const updateSelection = (section: ProblemSection, optionId: string) => {
@@ -120,10 +130,14 @@ export function ProblemDetailPage(): JSX.Element {
       return;
     }
 
-    const missingSection = SECTION_ORDER.find((section) => !selections[section]);
+    const missingSection = SECTION_ORDER.find(
+      (section) => !selections[section],
+    );
 
     if (missingSection) {
-      setValidationError(`Please choose an option for ${SECTION_COPY[missingSection].title}.`);
+      setValidationError(
+        `Please choose an option for ${SECTION_COPY[missingSection].title}.`,
+      );
       return;
     }
 
@@ -134,7 +148,11 @@ export function ProblemDetailPage(): JSX.Element {
     try {
       const preparedSelections = selections as AttemptSelections;
 
-      const evaluation = await submitAttempt(user.id, problem.id, preparedSelections);
+      const evaluation = await submitAttempt(
+        user.id,
+        problem.id,
+        preparedSelections,
+      );
 
       recordAttempt(problem.id, evaluation.attempt);
       setLastCorrectness(evaluation.attempt.correctness);
@@ -159,7 +177,9 @@ export function ProblemDetailPage(): JSX.Element {
       return;
     }
 
-    if (!window.confirm("This will clear attempts for all problems. Continue?")) {
+    if (
+      !window.confirm("This will clear attempts for all problems. Continue?")
+    ) {
       return;
     }
 
@@ -188,7 +208,11 @@ export function ProblemDetailPage(): JSX.Element {
           <p className="eyebrow">Flash card quiz</p>
           {problem ? <h1>{problem.title}</h1> : <h1>Loading problem</h1>}
         </div>
-        <button type="button" className="ghost-button" onClick={() => navigate("/problems")}>
+        <button
+          type="button"
+          className="ghost-button"
+          onClick={() => navigate("/problems")}
+        >
           Back to list
         </button>
       </header>
@@ -213,7 +237,9 @@ export function ProblemDetailPage(): JSX.Element {
           <div className="stack">
             <div className="panel-header">
               <h3>Quiz selections</h3>
-              <p className="muted">Choose one option per section, then submit once.</p>
+              <p className="muted">
+                Choose one option per section, then submit once.
+              </p>
             </div>
             <div className="section-grid quiz-grid">
               {SECTION_ORDER.map((section) => {
@@ -224,26 +250,36 @@ export function ProblemDetailPage(): JSX.Element {
                   sectionCorrectness === undefined
                     ? ""
                     : sectionCorrectness
-                    ? "is-correct"
-                    : "is-incorrect";
+                      ? "is-correct"
+                      : "is-incorrect";
 
                 return (
-                  <div key={section} className={`section-card quiz-card ${cardStatusClass}`}>
+                  <div
+                    key={section}
+                    className={`section-card quiz-card ${cardStatusClass}`}
+                  >
                     <div className="section-card__header">
                       <div className="stack">
                         <p className="eyebrow">{SECTION_COPY[section].title}</p>
                         <p className="muted">{SECTION_COPY[section].helper}</p>
                       </div>
                       {sectionCorrectness !== undefined ? (
-                        <span className={`status-pill ${sectionCorrectness ? "status-pill--success" : "status-pill--error"}`}>
+                        <span
+                          className={`status-pill ${sectionCorrectness ? "status-pill--success" : "status-pill--error"}`}
+                        >
                           {sectionCorrectness ? "Correct" : "Incorrect"}
                         </span>
                       ) : null}
                     </div>
-                    <div className="option-list" role="radiogroup" aria-label={SECTION_COPY[section].title}>
+                    <div
+                      className="option-list"
+                      role="radiogroup"
+                      aria-label={SECTION_COPY[section].title}
+                    >
                       {options.map((option) => {
                         const isSelected = selected === option.id;
-                        const showEvaluation = sectionCorrectness !== undefined && isSelected;
+                        const showEvaluation =
+                          sectionCorrectness !== undefined && isSelected;
                         const optionStateClass = showEvaluation
                           ? sectionCorrectness
                             ? "option-button--correct"
@@ -261,7 +297,11 @@ export function ProblemDetailPage(): JSX.Element {
                           >
                             <span className="option-label">{option.label}</span>
                             {showEvaluation ? (
-                              <span className="option-feedback">{sectionCorrectness ? "You nailed it" : "Not quite"}</span>
+                              <span className="option-feedback">
+                                {sectionCorrectness
+                                  ? "You nailed it"
+                                  : "Not quite"}
+                              </span>
                             ) : null}
                           </button>
                         );
@@ -273,7 +313,9 @@ export function ProblemDetailPage(): JSX.Element {
             </div>
           </div>
 
-          {validationError ? <p className="error-text">{validationError}</p> : null}
+          {validationError ? (
+            <p className="error-text">{validationError}</p>
+          ) : null}
           {submitError ? <p className="error-text">{submitError}</p> : null}
           {overallResult !== null ? (
             <p className={overallResult ? "success-text" : "muted"}>
@@ -285,18 +327,35 @@ export function ProblemDetailPage(): JSX.Element {
 
           <div className="quiz-actions">
             <div className="stack">
-              <p className="muted">Submit when all four sections are filled. Feedback appears after submission.</p>
+              <p className="muted">
+                Submit when all four sections are filled. Feedback appears after
+                submission.
+              </p>
               {lastAttempt ? (
-                <p className="muted">Last attempt: {formatDateTime(lastAttempt.timestamp)}</p>
+                <p className="muted">
+                  Last attempt: {formatDateTime(lastAttempt.timestamp)}
+                </p>
               ) : (
-                <p className="muted">No attempts yet. Your progress will be saved automatically.</p>
+                <p className="muted">
+                  No attempts yet. Your progress will be saved automatically.
+                </p>
               )}
             </div>
             <div className="quiz-buttons">
-              <button type="button" className="primary" onClick={handleSubmit} disabled={submitting}>
+              <button
+                type="button"
+                className="primary"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
                 {submitting ? "Submitting..." : "Submit answers"}
               </button>
-              <button type="button" className="ghost-button" onClick={handleTryAgain} disabled={submitting || resetting}>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={handleTryAgain}
+                disabled={submitting || resetting}
+              >
                 Try again
               </button>
               <button
@@ -313,7 +372,10 @@ export function ProblemDetailPage(): JSX.Element {
           <div className="stack">
             <div className="panel-header">
               <h3>Attempt history</h3>
-              <p className="muted">Attempts are stored on the backend. Resetting clears all problems.</p>
+              <p className="muted">
+                Attempts are stored on the backend. Resetting clears all
+                problems.
+              </p>
             </div>
             {attemptHistory.length === 0 ? (
               <p className="muted">You have not submitted any attempts yet.</p>
@@ -325,14 +387,23 @@ export function ProblemDetailPage(): JSX.Element {
                   const isLatest = index === attemptHistory.length - 1;
 
                   return (
-                    <li key={`${attempt.timestamp}-${index}`} className={`attempt-row ${isLatest ? "attempt-row--latest" : ""}`}>
+                    <li
+                      key={`${attempt.timestamp}-${index}`}
+                      className={`attempt-row ${isLatest ? "attempt-row--latest" : ""}`}
+                    >
                       <div className="stack">
                         <p className="eyebrow">Attempt {index + 1}</p>
-                        <p className="muted">{formatDateTime(attempt.timestamp)}</p>
+                        <p className="muted">
+                          {formatDateTime(attempt.timestamp)}
+                        </p>
                       </div>
                       <div className="attempt-score">
-                        <span className="pill">{score}/{sectionCount} correct</span>
-                        <span className="muted">{sectionCount} sections scored</span>
+                        <span className="pill">
+                          {score}/{sectionCount} correct
+                        </span>
+                        <span className="muted">
+                          {sectionCount} sections scored
+                        </span>
                       </div>
                     </li>
                   );
@@ -343,7 +414,8 @@ export function ProblemDetailPage(): JSX.Element {
 
           <div className="muted">
             <p>
-              Explore more problems from the <Link to="/problems">practice list</Link> when you're ready.
+              Explore more problems from the{" "}
+              <Link to="/problems">practice list</Link> when you're ready.
             </p>
           </div>
         </div>

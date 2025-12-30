@@ -6,7 +6,12 @@ export function ThemeToggle(): JSX.Element {
   const label = theme === "light" ? "Switch to dark" : "Switch to light";
 
   return (
-    <button className="ghost-button" type="button" onClick={toggleTheme} aria-label={label}>
+    <button
+      className="ghost-button"
+      type="button"
+      onClick={toggleTheme}
+      aria-label={label}
+    >
       {theme === "light" ? "🌞" : "🌜"}
     </button>
   );
