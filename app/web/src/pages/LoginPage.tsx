@@ -28,7 +28,6 @@ export function LoginPage(): JSX.Element {
 
     try {
       await authenticate(name.trim());
-      navigate("/problems");
     } catch (submitError: any) {
       setError(submitError?.message ?? "Could not create user.");
     } finally {
@@ -41,7 +40,9 @@ export function LoginPage(): JSX.Element {
       <header>
         <p className="eyebrow">Welcome</p>
         <h1>Create or continue your session</h1>
-        <p className="muted">Enter a username to start exploring the problems.</p>
+        <p className="muted">
+          Enter a username to start exploring the problems.
+        </p>
       </header>
       <form className="stack" onSubmit={handleSubmit}>
         <label className="stack" htmlFor="username">

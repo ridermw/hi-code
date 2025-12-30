@@ -1,7 +1,14 @@
 import fs from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
-import { Problem, ProblemSummary, User } from "../types";
+import {
+  Flashcard,
+  FlashcardCategory,
+  FlashcardSet,
+  Problem,
+  ProblemSummary,
+  User,
+} from "../types";
 import { StorageProvider } from "./storageProvider";
 
 interface ProblemIndexEntry extends ProblemSummary {
@@ -12,10 +19,36 @@ interface ProblemsIndexFile {
   problems: ProblemIndexEntry[];
 }
 
+interface FlashcardsIndexEntry {
+  id: string;
+  name: string;
+  description?: string;
+  path: string;
+  cardCount: number;
+}
+
+interface FlashcardsIndexFile {
+  categories: FlashcardsIndexEntry[];
+}
+
+interface FlashcardsFile {
+  category: {
+    id: string;
+    name: string;
+    description?: string;
+  };
+  cards: Flashcard[];
+}
+
 export class FileStorageProvider implements StorageProvider {
-  private readonly dataDir = path.resolve(__dirname, "..", "..", "data");
+  private readonly dataDir = resolveDataDir();
   private readonly usersDir = path.join(this.dataDir, "users");
   private readonly problemsIndexPath = path.join(this.dataDir, "problems.json");
+  private readonly flashcardsIndexPath = path.join(
+    this.dataDir,
+    "flashcards",
+    "index.json",
+  );
 
   private async readJson<T>(filePath: string): Promise<T> {
     const contents = await fs.readFile(filePath, "utf-8");
@@ -28,6 +61,10 @@ export class FileStorageProvider implements StorageProvider {
 
   private async loadProblemsIndex(): Promise<ProblemsIndexFile> {
     return this.readJson<ProblemsIndexFile>(this.problemsIndexPath);
+  }
+
+  private async loadFlashcardsIndex(): Promise<FlashcardsIndexFile> {
+    return this.readJson<FlashcardsIndexFile>(this.flashcardsIndexPath);
   }
 
   async getProblems(): Promise<ProblemSummary[]> {
@@ -52,6 +89,42 @@ export class FileStorageProvider implements StorageProvider {
     return this.readJson<Problem>(problemPath);
   }
 
+  async getFlashcardCategories(): Promise<FlashcardCategory[]> {
+    const index = await this.loadFlashcardsIndex();
+    return index.categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      description: category.description,
+      totalCards: category.cardCount,
+    }));
+  }
+
+  async getFlashcardsByCategory(
+    categoryId: string,
+  ): Promise<FlashcardSet | null> {
+    const index = await this.loadFlashcardsIndex();
+    const entry = index.categories.find(
+      (category) => category.id === categoryId,
+    );
+
+    if (!entry) {
+      return null;
+    }
+
+    const flashcardsPath = path.join(this.dataDir, entry.path);
+    const payload = await this.readJson<FlashcardsFile>(flashcardsPath);
+
+    return {
+      category: {
+        id: payload.category.id,
+        name: payload.category.name,
+        description: payload.category.description,
+        totalCards: payload.cards.length,
+      },
+      cards: payload.cards,
+    };
+  }
+
   async createUser(name: string): Promise<User> {
     await this.ensureUsersDir();
     const id = randomUUID();
@@ -60,6 +133,7 @@ export class FileStorageProvider implements StorageProvider {
       name,
       createdAt: new Date().toISOString(),
       attempts: {},
+      flashcardStars: {},
     };
 
     const userPath = path.join(this.usersDir, `${id}.json`);
@@ -70,7 +144,11 @@ export class FileStorageProvider implements StorageProvider {
   async getUser(userId: string): Promise<User | null> {
     try {
       const userPath = path.join(this.usersDir, `${userId}.json`);
-      return await this.readJson<User>(userPath);
+      const user = await this.readJson<User>(userPath);
+      return {
+        ...user,
+        flashcardStars: user.flashcardStars ?? {},
+      };
     } catch (error: any) {
       if (error?.code === "ENOENT") {
         return null;
@@ -85,4 +163,13 @@ export class FileStorageProvider implements StorageProvider {
     const userPath = path.join(this.usersDir, `${user.id}.json`);
     await fs.writeFile(userPath, JSON.stringify(user, null, 2), "utf-8");
   }
+}
+
+function resolveDataDir(): string {
+  const distSegment = `${path.sep}dist${path.sep}`;
+  const baseDir = __dirname.includes(distSegment)
+    ? path.resolve(__dirname, "..", "..", "..")
+    : path.resolve(__dirname, "..", "..");
+
+  return path.join(baseDir, "data");
 }

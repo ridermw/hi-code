@@ -3,7 +3,11 @@ import { Link, useNavigation } from "../router";
 import { ThemeToggle } from "./ThemeToggle";
 import { useUser } from "../user";
 
-export function Layout({ children }: { children: React.ReactNode }): JSX.Element {
+export function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element {
   const { path } = useNavigation();
   const { user, clearUser } = useUser();
 
@@ -14,8 +18,17 @@ export function Layout({ children }: { children: React.ReactNode }): JSX.Element
           <Link to="/problems">HI Code</Link>
         </div>
         <nav className="nav-links">
-          <Link to="/problems" className={path.startsWith("/problems") ? "active" : ""}>
+          <Link
+            to="/problems"
+            className={path.startsWith("/problems") ? "active" : ""}
+          >
             Problems
+          </Link>
+          <Link
+            to="/flashcards"
+            className={path.startsWith("/flashcards") ? "active" : ""}
+          >
+            Flashcards
           </Link>
         </nav>
         <div className="header-actions">
@@ -23,7 +36,11 @@ export function Layout({ children }: { children: React.ReactNode }): JSX.Element
           {user ? (
             <div className="user-chip">
               <span className="user-name">{user.name}</span>
-              <button type="button" className="ghost-button" onClick={clearUser}>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={clearUser}
+              >
                 Switch user
               </button>
             </div>

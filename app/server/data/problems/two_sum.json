@@ -7,24 +7,51 @@
   "difficulty": "Easy",
   "sections": {
     "algorithms": [
-      { "id": "alg-1", "label": "Traverse the array once while storing complements in a hash map." },
+      {
+        "id": "alg-1",
+        "label": "Traverse the array once while storing complements in a hash map."
+      },
       { "id": "alg-2", "label": "Check every pair with a double nested loop." },
-      { "id": "alg-3", "label": "Sort values then move two pointers toward each other." }
+      {
+        "id": "alg-3",
+        "label": "Sort values then move two pointers toward each other."
+      }
     ],
     "implementations": [
-      { "id": "impl-1", "label": "Iterate once with a Dictionary<int, int> that maps value to index; return when a complement is found." },
-      { "id": "impl-2", "label": "Use two for-loops to test all index combinations until a sum matches the target." },
-      { "id": "impl-3", "label": "Order the array with indices preserved, then use two pointers to search for the target sum." }
+      {
+        "id": "impl-1",
+        "label": "Iterate once with a Dictionary<int, int> that maps value to index; return when a complement is found."
+      },
+      {
+        "id": "impl-2",
+        "label": "Use two for-loops to test all index combinations until a sum matches the target."
+      },
+      {
+        "id": "impl-3",
+        "label": "Order the array with indices preserved, then use two pointers to search for the target sum."
+      }
     ],
     "timeComplexities": [
       { "id": "time-1", "label": "O(n) time using a single pass hash map." },
-      { "id": "time-2", "label": "O(n log n) time due to sorting before scanning." },
+      {
+        "id": "time-2",
+        "label": "O(n log n) time due to sorting before scanning."
+      },
       { "id": "time-3", "label": "O(n^2) time from evaluating all pairs." }
     ],
     "spaceComplexities": [
-      { "id": "space-1", "label": "O(n) space for the hash map of seen values." },
-      { "id": "space-2", "label": "O(log n) auxiliary space from sorting stack frames." },
-      { "id": "space-3", "label": "O(1) extra space by scanning the array in-place." }
+      {
+        "id": "space-1",
+        "label": "O(n) space for the hash map of seen values."
+      },
+      {
+        "id": "space-2",
+        "label": "O(log n) auxiliary space from sorting stack frames."
+      },
+      {
+        "id": "space-3",
+        "label": "O(1) extra space by scanning the array in-place."
+      }
     ]
   },
   "answerKey": {

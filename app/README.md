@@ -1,23 +1,24 @@
-# HI Code Interview Practice App
+# Interview Practice App
 
-Interactive full-stack application for practicing coding interview problems from the [`Problems/`](../Problems) collection. Built with TypeScript, Express, and React to provide a quiz-style interface with progress tracking.
+Interactive full-stack application for practicing coding interview problems from the [`Problems/`](../Problems) collection. Built with TypeScript, Express, and React to provide a quiz-style interface with progress tracking and flashcards.
 
 ## Purpose
 
 This app transforms the static problem collection (85+ LeetCode-style problems across 17 categories) into an interactive practice environment where you can:
 - Browse problems by category and difficulty
-- Take timed quizzes to simulate interview conditions
-- Track your attempt history and identify weak areas
+- Answer section-based quiz questions and review correctness
+- Track attempt history and identify weak areas
 - Reset progress to retake problems
-- Review detailed explanations and solutions
+- Study flashcards for concept mastery
 
 ## Project Structure
 
 ```
 app/
-├── packages/domain/     # Shared TypeScript types for API contracts
+├── packages/domain/     # Shared TypeScript types (not currently used by the app)
+├── packages/logging/    # Shared logging utilities for client and server
 ├── server/              # Express API + problem metadata + progress storage
-│   ├── data/           # Problem definitions and quiz configurations
+│   ├── data/           # Problem definitions, flashcards, user data
 │   └── src/            # API routes, storage providers, server logic
 └── web/                # React + Vite frontend
     └── src/            # UI components, API client, routing
@@ -25,9 +26,10 @@ app/
 
 ### Key Components
 
-- **`packages/domain/`** – Shared TypeScript domain types consumed by both server and web, ensuring type safety across the stack. Can be extended for future React Native clients.
-- **`server/`** – Express server exposing RESTful quiz APIs, loading problem metadata from `server/data/problems.json`, and persisting user progress to disk via pluggable storage providers.
-- **`web/`** – Vite + React + TypeScript frontend with routing (React Router), state management, and API integration. Stores active user in localStorage and syncs attempt history with backend.
+- **`packages/domain/`** - Shared TypeScript types available for future use. Current app types live in `server/src/types.ts` and `web/src/types.ts`.
+- **`packages/logging/`** - Shared logging helpers used by the server and web API client.
+- **`server/`** - Express server exposing REST APIs, loading problem metadata from `server/data`, and persisting user progress to disk via a pluggable storage provider.
+- **`web/`** - Vite + React + TypeScript frontend with a custom router (`web/src/router.tsx`), React context for user state, and API integration. Stores the active user id in localStorage and syncs attempt history with the backend.
 
 ## Quick Start
 
@@ -39,7 +41,7 @@ From the `app/` directory:
 npm run install:all
 ```
 
-This installs dependencies for all three packages (domain, server, web). To install individually:
+This installs dependencies for the domain package, logging package, server, and web app. To install individually:
 
 ```bash
 # Just the server
@@ -50,6 +52,9 @@ cd web && npm install
 
 # Just the domain package
 cd packages/domain && npm install
+
+# Just the logging package
+cd packages/logging && npm install
 ```
 
 ### Development Mode
@@ -60,11 +65,11 @@ Run both server and client concurrently with hot-reload:
 npm run dev
 ```
 
-**Ports:**
+Ports:
 - Server: `http://localhost:3000` (API endpoints)
 - Web: `http://localhost:5173` (Vite dev server with API proxy)
 
-**Run individually:**
+Run individually:
 ```bash
 # Server only (port 3000)
 npm run dev --prefix server
@@ -72,6 +77,11 @@ npm run dev --prefix server
 # Web only (port 5173)
 npm run dev --prefix web
 ```
+
+For parallel clones, override ports to avoid conflicts:
+
+- Server: `PORT=3001 npm run dev --prefix server`
+- Web: `npm run dev --prefix web -- --port 5174`
 
 ### Production Build
 
@@ -81,9 +91,9 @@ Build both the React frontend and Express server:
 npm run build
 ```
 
-**What this does:**
-1. Bundles React app → `web/dist/`
-2. Compiles TypeScript server → `server/dist/`
+What this does:
+1. Bundles React app -> `web/dist/`
+2. Compiles TypeScript server -> `server/dist/`
 
 ### Start Production Server
 
@@ -113,51 +123,56 @@ npm test --prefix web
 ## Architecture Details
 
 ### API Layer
-- **Location**: `server/src/index.ts`
-- **Endpoints**:
-  - `GET /api/problems` – List all available problems
-  - `GET /api/problems/:id` – Get problem details
-  - `POST /api/users/:userId/attempts` – Submit quiz attempt
-  - `GET /api/users/:userId/progress` – Retrieve attempt history
-  - `DELETE /api/users/:userId/progress` – Reset progress
-- **Storage**: File-based persistence in `server/data/` using a pluggable storage provider interface
-- **Validation**: Request/response validation using shared domain types
+- Location: `server/src/index.ts`
+- Endpoints:
+  - `GET /api/problems` - List all available problems
+  - `GET /api/problems/:id` - Get problem details
+  - `GET /api/flashcards` - List flashcard categories
+  - `GET /api/flashcards/:categoryId` - Get flashcards for a category
+  - `POST /api/users` - Create a user
+  - `GET /api/users/:userId/progress` - Retrieve attempt history
+  - `POST /api/users/:userId/attempts` - Submit a quiz attempt
+  - `POST /api/users/:userId/reset` - Reset progress
+  - `GET /api/users/:userId/flashcards/:categoryId` - Get starred flashcards
+  - `POST /api/users/:userId/flashcards/:categoryId/star` - Star or unstar a flashcard
+- Storage: File-based persistence in `server/data/` using a pluggable storage provider interface
+- Validation: Handled in route handlers with types defined in `server/src/types.ts`
 
 ### Frontend
-- **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite (fast HMR, optimized production builds)
-- **Routing**: React Router for navigation between problem list, quiz view, and results
-- **State Management**: React hooks + context for user state and progress
-- **API Client**: Fetch-based wrapper in `web/src/api.ts`
-- **Styling**: CSS modules + theme system (light/dark mode toggle)
-- **Testing**: Vitest + React Testing Library
+- Framework: React 18 + TypeScript
+- Build Tool: Vite (fast HMR, optimized production builds)
+- Routing: Custom router in `web/src/router.tsx`
+- State Management: React hooks + context for user state and progress
+- API Client: Fetch-based wrapper in `web/src/api.ts`
+- Styling: Global CSS with theme variables and a light/dark toggle
+- Testing: Vitest + React Testing Library
 
 ### Shared Domain
-- **Location**: `packages/domain/src/index.ts`
-- **Exports**: Problem, QuizAttempt, User, ApiResponse types
-- **Purpose**: Single source of truth for API contracts, prevents type drift between frontend and backend
+- Location: `packages/domain/src/index.ts`
+- Exports: Shared types for problems and attempts (not currently wired into the app)
+- Purpose: Optional single source of truth for API contracts if adopted later
 
 ## Development Workflow
 
-1. **Add new problems**: Update `server/data/problems.json` and create corresponding problem JSON files in `server/data/problems/`
-2. **Extend API**: Add routes in `server/src/index.ts`, update domain types in `packages/domain/src/`
-3. **Update UI**: Modify React components in `web/src/`, consume new API endpoints
-4. **Test**: Write unit tests in `*.test.ts(x)` files, run `npm test`
-5. **Deploy**: Build with `npm run build`, deploy `server/dist/` and `web/dist/` to hosting platform
+1. Add new problems: Update `server/data/problems.json` and create corresponding problem JSON files in `server/data/problems/`
+2. Extend API: Add routes in `server/src/index.ts`, update types in `server/src/types.ts` and `web/src/types.ts` (optionally update `packages/domain/src/`)
+3. Update UI: Modify React components in `web/src/`, consume new API endpoints
+4. Test: Write unit tests in `*.test.ts(x)` files, run `npm test`
+5. Deploy: Build with `npm run build`, deploy `server/dist/` and `web/dist/` to hosting platform
 
 ## Environment Variables
 
 ### Server
-- `PORT` – Server port (default: 3000)
-- `NODE_ENV` – `development` or `production`
-- `DATA_DIR` – Path to problem data directory
+- `PORT` - Server port (default: 3000)
+- `NODE_ENV` - `development` or `production`
+- `HI_CODE_LOG_LEVEL` (or `LOG_LEVEL`) - Logging level (`silent|error|warn|info|debug|trace`)
 
 ### Web
-- `VITE_API_URL` – API base URL (default: proxies to `http://localhost:3000` in dev)
+- `VITE_LOG_LEVEL` - Logging level for the web API client
 
 ## Future Enhancements
 
-- [ ] Integration with main problem markdown files in `../Problems/`
+- [ ] Expand content generation from `../Problems/` for more categories and problem data
 - [ ] Timer functionality for timed quiz mode
 - [ ] Difficulty-based filtering and recommendations
 - [ ] Progress analytics and performance trends

@@ -1,26 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import { Router, RouteSwitch, useNavigation } from "./router";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
+import { FlashcardsPage } from "./pages/FlashcardsPage";
 import { ProblemsPage } from "./pages/ProblemsPage";
 import { ProblemDetailPage } from "./pages/ProblemDetailPage";
 import { ThemeProvider } from "./theme";
 import { UserProvider, useUser } from "./user";
 
-function ProtectedRoute({ children }: { children: React.ReactNode }): JSX.Element {
+function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}): JSX.Element | null {
   const { user, loading } = useUser();
   const { path, navigate } = useNavigation();
+
+  const shouldRedirect = !loading && !user && path !== "/login";
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      navigate("/login");
+    }
+  }, [navigate, shouldRedirect]);
 
   if (loading) {
     return <p className="muted">Loading profile...</p>;
   }
 
   if (!user) {
-    if (path !== "/login") {
-      navigate("/login");
-    }
-    return <LoginPage />;
+    return null;
   }
 
   return <>{children}</>;
@@ -32,9 +42,38 @@ function AppShell(): JSX.Element {
       <RouteSwitch
         routes={[
           { path: "/login", element: <LoginPage /> },
-          { path: "/problems", element: <ProtectedRoute><ProblemsPage /></ProtectedRoute> },
-          { path: "/problems/:id", element: <ProtectedRoute><ProblemDetailPage /></ProtectedRoute> },
-          { path: "/", element: <ProtectedRoute><ProblemsPage /></ProtectedRoute> },
+          {
+            path: "/problems",
+            element: (
+              <ProtectedRoute>
+                <ProblemsPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/problems/:id",
+            element: (
+              <ProtectedRoute>
+                <ProblemDetailPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/flashcards",
+            element: (
+              <ProtectedRoute>
+                <FlashcardsPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "/",
+            element: (
+              <ProtectedRoute>
+                <ProblemsPage />
+              </ProtectedRoute>
+            ),
+          },
         ]}
         fallback={<LoginPage />}
       />

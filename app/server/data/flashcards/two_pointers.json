@@ -1,0 +1,135 @@
+{
+  "category": {
+    "id": "two_pointers",
+    "name": "Two Pointers",
+    "description": "Core pointer patterns for arrays and linked lists."
+  },
+  "cards": [
+    {
+      "id": "two-pointers-core",
+      "category": "two_pointers",
+      "term": "Two Pointers",
+      "definition": "Two pointers is an algorithmic technique that uses two references (indices) to traverse a data structure, typically an array or linked list. The pointers can move in various patterns: toward each other, in the same direction, or at different speeds. This approach often reduces time complexity from O(n^2) to O(n).",
+      "whenToUse": [
+        "Working with sorted arrays (enables direction-based decisions)",
+        "Need to find pairs/triplets with specific properties",
+        "Optimizing from nested loops (O(n^2) -> O(n))",
+        "Problems involving symmetry or opposite ends",
+        "Need to partition or rearrange in-place"
+      ],
+      "genericPatterns": [
+        "Opposite Ends: Start at beginning and end, move toward center",
+        "Same Direction (Fast/Slow): Both start at beginning, move at different speeds",
+        "Fixed Distance: Maintain constant gap between pointers",
+        "Sliding Window: Expand and contract window based on conditions"
+      ],
+      "simpleExamples": [
+        "Find two numbers in sorted array that sum to target",
+        "With one pointer at start (small values) and one at end (large values), we can make greedy decisions. If sum too small, move left pointer (increase sum). If sum too large, move right pointer (decrease sum). This exploits the sorted property.",
+        "Check all pairs -> O(n^2)",
+        "Each pointer moves at most n times -> O(n)"
+      ],
+      "algorithmPrompt": "You have a sorted array and need to decide if any two values sum to a target. Which two-pointer pattern applies?",
+      "difficultyStarred": false
+    },
+    {
+      "id": "two-pointers-opposite-ends",
+      "category": "two_pointers",
+      "term": "Opposite Ends",
+      "definition": "Start at beginning and end, move toward center",
+      "whenToUse": [
+        "Working with sorted arrays (enables direction-based decisions)",
+        "Need to find pairs/triplets with specific properties",
+        "Optimizing from nested loops (O(n^2) -> O(n))",
+        "Problems involving symmetry or opposite ends",
+        "Need to partition or rearrange in-place"
+      ],
+      "genericPatterns": [
+        "left = 0, right = array.length - 1",
+        "while left < right:",
+        "process(array[left], array[right])",
+        "if condition: move left",
+        "else: move right"
+      ],
+      "simpleExamples": [
+        "Find two numbers in sorted array that sum to target",
+        "With one pointer at start (small values) and one at end (large values), we can make greedy decisions. If sum too small, move left pointer (increase sum). If sum too large, move right pointer (decrease sum). This exploits the sorted property.",
+        "Check all pairs -> O(n^2)",
+        "Each pointer moves at most n times -> O(n)"
+      ],
+      "difficultyStarred": false
+    },
+    {
+      "id": "two-pointers-same-direction-fast-slow",
+      "category": "two_pointers",
+      "term": "Same Direction (Fast/Slow)",
+      "definition": "Both start at beginning, move at different speeds",
+      "whenToUse": [
+        "Working with sorted arrays (enables direction-based decisions)",
+        "Need to find pairs/triplets with specific properties",
+        "Optimizing from nested loops (O(n^2) -> O(n))",
+        "Problems involving symmetry or opposite ends",
+        "Need to partition or rearrange in-place"
+      ],
+      "genericPatterns": [
+        "slow = 0, fast = 0",
+        "while fast < array.length:",
+        "if condition: slow++",
+        "fast++"
+      ],
+      "simpleExamples": [
+        "Find two numbers in sorted array that sum to target",
+        "With one pointer at start (small values) and one at end (large values), we can make greedy decisions. If sum too small, move left pointer (increase sum). If sum too large, move right pointer (decrease sum). This exploits the sorted property.",
+        "Check all pairs -> O(n^2)",
+        "Each pointer moves at most n times -> O(n)"
+      ],
+      "difficultyStarred": false
+    },
+    {
+      "id": "two-pointers-fixed-distance",
+      "category": "two_pointers",
+      "term": "Fixed Distance",
+      "definition": "Maintain constant gap between pointers",
+      "whenToUse": [
+        "Working with sorted arrays (enables direction-based decisions)",
+        "Need to find pairs/triplets with specific properties",
+        "Optimizing from nested loops (O(n^2) -> O(n))",
+        "Problems involving symmetry or opposite ends",
+        "Need to partition or rearrange in-place"
+      ],
+      "genericPatterns": [
+        "for i = 0 to length - k:",
+        "j = i + k",
+        "process(array[i], array[j])"
+      ],
+      "simpleExamples": [
+        "Find two numbers in sorted array that sum to target",
+        "With one pointer at start (small values) and one at end (large values), we can make greedy decisions. If sum too small, move left pointer (increase sum). If sum too large, move right pointer (decrease sum). This exploits the sorted property.",
+        "Check all pairs -> O(n^2)",
+        "Each pointer moves at most n times -> O(n)"
+      ],
+      "difficultyStarred": false
+    },
+    {
+      "id": "two-pointers-sliding-window",
+      "category": "two_pointers",
+      "term": "Sliding Window",
+      "definition": "Expand and contract window based on conditions",
+      "whenToUse": [
+        "Working with sorted arrays (enables direction-based decisions)",
+        "Need to find pairs/triplets with specific properties",
+        "Optimizing from nested loops (O(n^2) -> O(n))",
+        "Problems involving symmetry or opposite ends",
+        "Need to partition or rearrange in-place"
+      ],
+      "genericPatterns": ["Expand and contract window based on conditions"],
+      "simpleExamples": [
+        "Find two numbers in sorted array that sum to target",
+        "With one pointer at start (small values) and one at end (large values), we can make greedy decisions. If sum too small, move left pointer (increase sum). If sum too large, move right pointer (decrease sum). This exploits the sorted property.",
+        "Check all pairs -> O(n^2)",
+        "Each pointer moves at most n times -> O(n)"
+      ],
+      "difficultyStarred": false
+    }
+  ]
+}
