@@ -1,0 +1,66 @@
+{
+  "id": "longest_substring_without_repeating_characters",
+  "title": "Longest Substring Without Repeating Characters",
+  "statement": "Given a string s, return the length of the longest substring that contains no repeating characters. Maintain a dynamic window of unique characters, expanding when new characters appear and shrinking past duplicates to keep the window valid.",
+  "signature": "int LengthOfLongestSubstring(string s)",
+  "category": "Sliding Window",
+  "difficulty": "Medium",
+  "sections": {
+    "algorithms": [
+      { "id": "alg-1", "label": "Slide a window with a hash map of last seen positions, moving the left bound past duplicates." },
+      { "id": "alg-2", "label": "Restart the window from each duplicate character without tracking prior indices." },
+      { "id": "alg-3", "label": "Sort characters then scan for the longest run of distinct letters." },
+      { "id": "alg-4", "label": "Use a queue to store characters and rebuild it whenever a duplicate appears." },
+      { "id": "alg-5", "label": "Count character frequencies across the whole string and subtract repeated counts." },
+      { "id": "alg-6", "label": "Fix the left boundary and extend right until a duplicate appears, then restart from the next index." }
+    ],
+    "implementations": [
+      {
+        "id": "impl-1",
+        "label": "```csharp\npublic int LengthOfLongestSubstring(string s) {\n    var last = new Dictionary<char, int>();\n    int left = 0, best = 0;\n    for (int right = 0; right < s.Length; right++) {\n        char c = s[right];\n        if (last.TryGetValue(c, out int prev) && prev >= left) {\n            left = prev + 1;\n        }\n        last[c] = right;\n        best = Math.Max(best, right - left + 1);\n    }\n    return best;\n}\n```"
+      },
+      {
+        "id": "impl-2",
+        "label": "```csharp\npublic int LengthOfLongestSubstring(string s) {\n    var window = new List<char>();\n    int best = 0;\n    foreach (char c in s) {\n        if (window.Contains(c)) {\n            window.Clear();\n        }\n        window.Add(c);\n        best = Math.Max(best, window.Count);\n    }\n    return best;\n}\n```"
+      },
+      {
+        "id": "impl-3",
+        "label": "```csharp\npublic int LengthOfLongestSubstring(string s) {\n    var seen = new HashSet<char>();\n    int best = 0;\n    for (int i = 0; i < s.Length; i++) {\n        seen.Clear();\n        for (int j = i; j < s.Length; j++) {\n            if (!seen.Add(s[j])) break;\n            best = Math.Max(best, j - i + 1);\n        }\n    }\n    return best;\n}\n```"
+      },
+      {
+        "id": "impl-4",
+        "label": "```csharp\npublic int LengthOfLongestSubstring(string s) {\n    int left = 0, best = 0;\n    var freq = new int[256];\n    for (int right = 0; right < s.Length; right++) {\n        freq[s[right]]++;\n        while (freq[s[right]] > 1) {\n            freq[s[left]]--;\n            left++;\n        }\n        best = Math.Max(best, right - left + 1);\n    }\n    return best;\n}\n```"
+      },
+      {
+        "id": "impl-5",
+        "label": "```csharp\npublic int LengthOfLongestSubstring(string s) {\n    var set = new HashSet<char>(s);\n    return set.Count;\n}\n```"
+      },
+      {
+        "id": "impl-6",
+        "label": "```csharp\npublic int LengthOfLongestSubstring(string s) {\n    if (string.IsNullOrEmpty(s)) return 0;\n    int best = 1;\n    for (int i = 0; i < s.Length - 1; i++) {\n        if (s[i] == s[i + 1]) continue;\n        best = Math.Max(best, 2);\n    }\n    return best;\n}\n```"
+      }
+    ],
+    "timeComplexities": [
+      { "id": "time-1", "label": "O(n) time by moving each pointer across the string once." },
+      { "id": "time-2", "label": "O(n^2) time from restarting the scan after every duplicate." },
+      { "id": "time-3", "label": "O(n log n) time dominated by sorting the characters." },
+      { "id": "time-4", "label": "O(n^2) time when clearing and rebuilding the window repeatedly." },
+      { "id": "time-5", "label": "O(n^3) time from triple nested checks of character uniqueness." },
+      { "id": "time-6", "label": "O(1) time because only constant work is done per string." }
+    ],
+    "spaceComplexities": [
+      { "id": "space-1", "label": "O(min(n, k)) space for the hash map of last seen positions." },
+      { "id": "space-2", "label": "O(n) space to store the entire window in a list each time." },
+      { "id": "space-3", "label": "O(1) extra space after sorting characters in place." },
+      { "id": "space-4", "label": "O(k) space for a fixed-size frequency array of ASCII characters." },
+      { "id": "space-5", "label": "O(n^2) space from storing all substrings for comparison." },
+      { "id": "space-6", "label": "O(1) space because no additional structures are used beyond loop indices." }
+    ]
+  },
+  "answerKey": {
+    "algorithms": "alg-1",
+    "implementations": "impl-1",
+    "timeComplexities": "time-1",
+    "spaceComplexities": "space-1"
+  }
+}
