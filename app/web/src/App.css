@@ -152,7 +152,7 @@
 }
 
 .quiz-grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .quiz-card {
@@ -186,6 +186,7 @@
   border-radius: 10px;
   padding: 0.75rem 0.85rem;
   text-align: left;
+  width: 100%;
   cursor: pointer;
   transition:
     border-color 0.15s ease,
@@ -214,6 +215,31 @@
 
 .option-label {
   font-weight: 600;
+}
+
+.option-steps {
+  margin: 0;
+  padding-left: 1.4rem;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.option-steps li {
+  margin: 0.2rem 0;
+}
+
+.option-code {
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
 }
 
 .option-feedback {

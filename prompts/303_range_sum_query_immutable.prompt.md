@@ -39,6 +39,16 @@ Constraints:
 - The FIRST option in each section is the correct answer.
 - The remaining five options should be plausible but incorrect.
 - Encourage creativity and near-miss mistakes (do not include another correct answer).
+- Algorithm labels should read like pseudocode step lists (multiline is OK).
+  Example (correct algorithm):
+  Initialize left = 0, maxLength = 0, charMap (HashSet)
+  For right from 0 to string length - 1:
+      // Expand window by adding right character
+      While character at right exists in charMap:
+          Remove character at left from charMap  // Shrink window
+          Increment left pointer
+      Add character at right to charMap
+      Update maxLength = max(maxLength, right - left + 1)
 - Implementation labels MUST be markdown code blocks with C# code.
 - Keep algorithm/time/space labels as concise sentences.
 - If the statement below is incomplete, refine it while staying faithful to the title.

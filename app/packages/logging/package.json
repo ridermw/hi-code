@@ -2,6 +2,13 @@
   "name": "@hi-code/logging",
   "version": "0.1.0",
   "private": true,
-  "main": "index.js",
+  "type": "module",
+  "main": "./index.cjs",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.cjs"
+    }
+  },
   "types": "index.d.ts"
 }
