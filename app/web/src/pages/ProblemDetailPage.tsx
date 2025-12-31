@@ -64,6 +64,29 @@ function countCorrect(correctness: AttemptCorrectness): number {
   return Object.values(correctness).filter(Boolean).length;
 }
 
+function getAlgorithmSteps(label: string): string[] {
+  const trimmed = label.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const lines = trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim().replace(/^[-*]\s+/, "").replace(/^\d+\.\s+/, ""))
+    .filter(Boolean);
+
+  if (lines.length > 1) {
+    return lines;
+  }
+
+  const sentences = trimmed
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+
+  return sentences.length > 0 ? sentences : [trimmed];
+}
+
 export function ProblemDetailPage(): JSX.Element {
   const params = useRouteParams();
   const { navigate } = useNavigation();
@@ -286,6 +309,19 @@ export function ProblemDetailPage(): JSX.Element {
                             : "option-button--incorrect"
                           : "";
 
+                        const shouldRenderCode =
+                          section === "implementations" &&
+                          option.label.trim().startsWith("```");
+                        const codeMatch = shouldRenderCode
+                          ? option.label
+                              .trim()
+                              .match(/```csharp\s*([\s\S]*?)```/i)
+                          : null;
+                        const algorithmSteps =
+                          section === "algorithms"
+                            ? getAlgorithmSteps(option.label)
+                            : null;
+
                         return (
                           <button
                             key={option.id}
@@ -295,7 +331,21 @@ export function ProblemDetailPage(): JSX.Element {
                             role="radio"
                             aria-checked={isSelected}
                           >
-                            <span className="option-label">{option.label}</span>
+                            {codeMatch ? (
+                              <pre className="option-code">
+                                <code>{codeMatch[1].trim()}</code>
+                              </pre>
+                            ) : algorithmSteps ? (
+                              <ol className="option-steps">
+                                {algorithmSteps.map((step, index) => (
+                                  <li key={`${option.id}-step-${index}`}>
+                                    {step}
+                                  </li>
+                                ))}
+                              </ol>
+                            ) : (
+                              <span className="option-label">{option.label}</span>
+                            )}
                             {showEvaluation ? (
                               <span className="option-feedback">
                                 {sectionCorrectness

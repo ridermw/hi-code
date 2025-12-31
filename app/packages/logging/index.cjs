@@ -65,4 +65,7 @@ function createLogger(currentLevel) {
   return { log, shouldLog, formatLogValue };
 }
 
-export { createLogger, normalizeLogLevel };
+module.exports = {
+  createLogger,
+  normalizeLogLevel,
+};

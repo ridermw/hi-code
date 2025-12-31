@@ -6,6 +6,13 @@
       "category": "Arrays",
       "difficulty": "Easy",
       "path": "problems/two_sum.json"
+    },
+    {
+      "id": "longest_substring_without_repeating_characters",
+      "title": "Longest Substring Without Repeating Characters",
+      "category": "Sliding Window",
+      "difficulty": "Medium",
+      "path": "problems/longest_substring_without_repeating_characters.json"
     }
   ]
 }
